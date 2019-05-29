@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Contratos;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Lógica
 {
@@ -56,6 +57,69 @@ namespace Lógica
                 File.Create(pathSalas).Close();
         }
 
+
+        //DESERIALIZACION DE ARCHIVOS
+        public void LeerDirectores()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Directores.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Directores = JsonConvert.DeserializeObject<Directora[]>(contenido);
+            }
+        }
+        public void LeerDocentes()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Docentes.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Docentes = JsonConvert.DeserializeObject<Docente[]>(contenido);
+            }
+        }
+        public void LeerPadres()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Padres.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Padres = JsonConvert.DeserializeObject<Padre[]>(contenido);
+            }
+        }
+        public void LeerAlumnos()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Alumnos.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Alumnos = JsonConvert.DeserializeObject<Hijo[]>(contenido);
+            }
+        }
+        public void LeerInstituciones()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Instituciones.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Instituciones = JsonConvert.DeserializeObject<Institucion[]>(contenido);
+            }
+        }
+        public void LeerNotas()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Notas.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Notas = JsonConvert.DeserializeObject<Nota[]>(contenido);
+            }
+        }
+        public void LeerSalas()
+        {
+            using (StreamReader leer = new StreamReader(@"C:\Archivos\Salas.txt"))
+            {
+                string contenido = leer.ReadToEnd();
+                Salas = JsonConvert.DeserializeObject<Sala[]>(contenido);
+            }
+        }
+
+
+
+
+        //PONER NOMBRE AL GRUPO
         public string ObtenerNombreGrupo()
         {
             return $"Albrecht - Heit - Llull";
@@ -76,7 +140,7 @@ namespace Lógica
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
