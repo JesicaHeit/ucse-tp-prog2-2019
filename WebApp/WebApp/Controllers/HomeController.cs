@@ -1,5 +1,5 @@
 ﻿using Contratos;
-using Mocks;
+using Lógica;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace WebApp.Controllers
 {
     public class HomeController : BaseController
     {
-        private static IServicioWeb servicio = new MockService();
+        private static IServicioWeb servicio = new LógicaGeneral();
 
         public ActionResult Index()
         {

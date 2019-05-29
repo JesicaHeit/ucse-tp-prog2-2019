@@ -1,4 +1,5 @@
 ﻿using Contratos;
+using Lógica;
 using Mocks;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,7 @@ namespace WebApp
     public class BaseController : Controller
     {
         //protected static IServicioWeb servicio = new MockService();
+
+        protected static IServicioWeb servicio = new LógicaGeneral();
     }
 }
