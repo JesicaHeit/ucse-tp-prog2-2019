@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Lógica
 {
-    public class LógicaGeneral : IServicioWeb
+    public class LógicaGeneral 
     {
         private Institucion[] Instituciones { get; set; }
         private Directora[] Directores { get; set; }
