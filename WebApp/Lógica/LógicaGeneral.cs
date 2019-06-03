@@ -140,7 +140,7 @@ namespace Lógica
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            
+            throw new NotImplementedException();
         }
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
