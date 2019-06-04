@@ -10,56 +10,16 @@ namespace Implementación
 {
     class ImplementaciónService : IServicioWeb
     {
-        public static List<Directora> _directoras = new List<Directora>()
-        {
-            new Directora(){ Id = 1, Nombre = "A 1", Apellido ="B", Email = "C", Cargo = "D"},new Directora(){ Id = 2, Nombre = "A 2", Apellido ="B", Email = "C", Cargo = "D"},
-            new Directora(){ Id = 3, Nombre = "A 3", Apellido ="B", Email = "C", Cargo = "D"},new Directora(){ Id = 4, Nombre = "A 4", Apellido ="B", Email = "C", Cargo = "D"},
-            new Directora(){ Id = 5, Nombre = "A 5", Apellido ="B", Email = "C", Cargo = "D"},new Directora(){ Id = 6, Nombre = "A 6", Apellido ="B", Email = "C", Cargo = "D"},
-            new Directora(){ Id = 7, Nombre = "A 7", Apellido ="B", Email = "C", Cargo = "D"},new Directora(){ Id = 8, Nombre = "A 8", Apellido ="B", Email = "C", Cargo = "D"},
-            new Directora(){ Id = 9, Nombre = "A 9", Apellido ="B", Email = "C", Cargo = "D"},new Directora(){ Id = 10, Nombre = "A 10", Apellido ="B", Email = "C", Cargo = "D"},
-            new Directora(){ Id = 11, Nombre = "A 11", Apellido ="B", Email = "C", Cargo = "D"},new Directora(){ Id = 12, Nombre = "A 12", Apellido ="B", Email = "C", Cargo = "D"},
-        };
-
-        public static List<Docente> _docentes = new List<Docente>()
-        {
-            new Docente(){ Id = 1, Nombre = "D 1", Apellido ="DA 1", Email = "DE 1"},new Docente(){ Id = 2, Nombre = "D 2", Apellido ="DA 2", Email = "DE 2"},
-            new Docente(){ Id = 3, Nombre = "D 3", Apellido ="DA 3", Email = "DE 3"},new Docente(){ Id = 4, Nombre = "D 4", Apellido ="DA 4", Email = "DE 4"},
-            new Docente(){ Id = 5, Nombre = "D 5", Apellido ="DA 5", Email = "DE 5"},new Docente(){ Id = 6, Nombre = "D 6", Apellido ="DA 6", Email = "DE 6"},
-            new Docente(){ Id = 7, Nombre = "D 7", Apellido ="DA 7", Email = "DE 7"},new Docente(){ Id = 8, Nombre = "D 8", Apellido ="DA 8", Email = "DE 8"},
-            new Docente(){ Id = 9, Nombre = "D 9", Apellido ="DA 9", Email = "DE 9"},new Docente(){ Id = 10, Nombre = "D 10", Apellido ="DA 10", Email = "DE 10"},
-            new Docente(){ Id = 11, Nombre = "D 11", Apellido ="DA 11", Email = "DE 11"},new Docente(){ Id = 12, Nombre = "D 12", Apellido ="DA 12", Email = "DE 12"},
-            new Docente(){ Id = 13, Nombre = "D 13", Apellido ="DA 13", Email = "DE 13"},new Docente(){ Id = 14, Nombre = "D 14", Apellido ="DA 14", Email = "DE 14"},
-            new Docente(){ Id = 15, Nombre = "D 15", Apellido ="DA 15", Email = "DE 15"},new Docente(){ Id = 16, Nombre = "D 16", Apellido ="DA 16", Email = "DE 16"},
-        };
-
-        public static List<Padre> _padres = new List<Padre>()
-        {
-            new Padre(){ Id = 1, Nombre = "P 1", Apellido = "PA 1", Email = "PE 1"},new Padre(){ Id = 2, Nombre = "P 2", Apellido = "PA 2", Email = "PE 2"},
-            new Padre(){ Id = 3, Nombre = "P 3", Apellido = "PA 3", Email = "PE 3"},new Padre(){ Id = 4, Nombre = "P 4", Apellido = "PA 4", Email = "PE 4"},
-            new Padre(){ Id = 5, Nombre = "P 5", Apellido = "PA 5", Email = "PE 5"},new Padre(){ Id = 6, Nombre = "P 6", Apellido = "PA 6", Email = "PE 6"},
-            new Padre(){ Id = 7, Nombre = "P 7", Apellido = "PA 7", Email = "PE 7"},new Padre(){ Id = 8, Nombre = "P 8", Apellido = "PA 8", Email = "PE 8"},
-            new Padre(){ Id = 9, Nombre = "P 9", Apellido = "PA 9", Email = "PE 9"},new Padre(){ Id = 10, Nombre = "P 10", Apellido = "PA 10", Email = "PE 10"},
-            new Padre(){ Id = 11, Nombre = "P 11", Apellido = "PA 11", Email = "PE 11"},new Padre(){ Id = 12, Nombre = "P 12", Apellido = "PA 12", Email = "PE 12"},
-        };
-
-        public static List<Hijo> _alumnos = new List<Hijo>()
-        {
-            new Hijo(){ Id = 1, Nombre = "AL 1", Apellido="AP 1", Email="APE 1", FechaNacimiento = new DateTime(1990,5,4), ResultadoUltimaEvaluacionAnual = 10},
-            new Hijo(){ Id = 2, Nombre = "AL 2", Apellido="AP 2", Email="APE 2", FechaNacimiento = new DateTime(1991,3,20), ResultadoUltimaEvaluacionAnual = 6},
-            new Hijo(){ Id = 3, Nombre = "AL 3", Apellido="AP 3", Email="APE 3", FechaNacimiento = new DateTime(1992,12,14), ResultadoUltimaEvaluacionAnual = 5},
-            new Hijo(){ Id = 4, Nombre = "AL 4", Apellido="AP 4", Email="APE 4", FechaNacimiento = new DateTime(1989,11,29), ResultadoUltimaEvaluacionAnual = 3},
-        };
+        public static LógicaGeneral Logica = new LógicaGeneral();
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
-
+            return Logica.AltaDirectora(directora,usuarioLogueado);       
         }
 
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
-
+            return Logica.AltaDocente(docente, usuarioLogueado);
         }
 
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
