@@ -90,7 +90,7 @@ namespace Implementación
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EliminarDirectora(id, directora, usuarioLogueado);
 
         }
 
@@ -135,7 +135,7 @@ namespace Implementación
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerDirectoraPorId(usuarioLogueado, id);
         }
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)

@@ -387,9 +387,18 @@ namespace Lógica
         }
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
-        {
-            throw new NotImplementedException();
-
+        {            
+            LeerDirectores().RemoveAll(x=>x.Id == directora.Id);
+            LeerUsuarios().RemoveAll(x => x.Id == directora.Id);
+            using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Directores));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            return new Resultado();
         }
 
         public Resultado EliminarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
@@ -447,7 +456,8 @@ namespace Lógica
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return LeerDirectores().Where(x => x.Id == id).FirstOrDefault();
+            
         }
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
@@ -542,12 +552,12 @@ namespace Lógica
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
-            /*  if (email == "" || clave == "")
+            if (email == "" || clave == "")
                   return null;
 
               if (email == "directora@ucse.com" && clave == "123456")
                   return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[] { Roles.Directora }, RolSeleccionado = Roles.Directora };
-  */
+  
             Claves datos = LeerClaves().Where(x => x.Email == email && x.Clave == clave).FirstOrDefault();
             if (datos != null)
             { //NO PONE BIEN EL ROL
