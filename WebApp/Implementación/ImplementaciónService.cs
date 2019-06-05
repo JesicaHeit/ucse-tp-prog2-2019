@@ -8,9 +8,13 @@ using Lógica;
 
 namespace Implementación
 {
-    class ImplementaciónService : IServicioWeb
+    public class ImplementaciónService : IServicioWeb
     {
         public static LógicaGeneral Logica = new LógicaGeneral();
+        public ImplementaciónService()
+        {
+            Logica.CrearArchivos();
+        }
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
@@ -119,7 +123,7 @@ namespace Implementación
 
         public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerAlumnos(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
 
         }
 
@@ -135,8 +139,8 @@ namespace Implementación
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
-
+              return Logica.ObtenerDirectoras(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
+       
         }
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
@@ -183,7 +187,7 @@ namespace Implementación
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerUsuario(email, clave);
 
         }
 

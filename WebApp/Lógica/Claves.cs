@@ -11,7 +11,7 @@ namespace Lógica
         Padre, Directora, Docente
     }
 
-    class Claves
+    public class Claves
     {
         public string Clave { get; set; }
         public string Email { get; set; }
