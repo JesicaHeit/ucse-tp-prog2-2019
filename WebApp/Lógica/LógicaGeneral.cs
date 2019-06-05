@@ -214,7 +214,47 @@ namespace Lógica
 
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<string> errores = new List<string>();
+            docente.Id = Docentes.Count() + 1;
+            if (usuarioLogueado.RolSeleccionado == Roles.Docente) //tiene permiso --> ver si ya está logueado con OTRO ROL
+            {
+                Usuario usuario = Usuarios.ToList().Where(x => x.Email == docente.Email).FirstOrDefault();
+                if (usuario == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
+                {
+                    Random rnd = new Random();
+                    Claves nueva = new Claves() { Email = docente.Email, Roles = new Roless[] { Roless.Docente }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves.ToList().Add(nueva); //guardar clave 
+                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO              
+                    Usuarios.ToList().Add(docente);
+                    Usuarios.ToArray();
+                    using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+                    {
+                        Writer.Write(JsonConvert.SerializeObject(Usuarios));
+                    }
+                }
+                else //ya está registrado, se agrega ROL en archivo "claves" 
+                {
+                    Claves clave = Claves.ToList().Where(x => x.Email == docente.Email).FirstOrDefault();
+                    clave.Roles[clave.Roles.Count()] = Roless.Docente;
+                }
+                //GUARDAR clave nueva o actualizacion de roles
+                using (StreamWriter Writer = new StreamWriter(pathClaves, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Claves));
+                }
+                //en ambos casos se agrega a "docentes", si no está logueado o si tiene este nuevo rol
+                Docentes.ToList().Add(docente);
+                Docentes.ToArray();
+                using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Docentes));
+                }
+            }
+            else //no tiene permiso
+            {
+                errores.Add("No  está autorizado para dar de alta a Docente");
+            }
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
@@ -230,8 +270,47 @@ namespace Lógica
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
-
+            List<string> errores = new List<string>();
+            padre.Id = Directores.Count() + 1;
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre) //tiene permiso --> ver si ya está logueado con OTRO ROL
+            {
+                Usuario usuario = Usuarios.ToList().Where(x => x.Email == padre.Email).FirstOrDefault();
+                if (usuario == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
+                {
+                    Random rnd = new Random();
+                    Claves nueva = new Claves() { Email = padre.Email, Roles = new Roless[] { Roless.Padre }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves.ToList().Add(nueva); //guardar clave 
+                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO              
+                    Usuarios.ToList().Add(padre);
+                    Usuarios.ToArray();
+                    using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+                    {
+                        Writer.Write(JsonConvert.SerializeObject(Usuarios));
+                    }
+                }
+                else //ya está registrado, se agrega ROL en archivo "claves" 
+                {
+                    Claves clave = Claves.ToList().Where(x => x.Email == padre.Email).FirstOrDefault();
+                    clave.Roles[clave.Roles.Count()] = Roless.Padre;
+                }
+                //GUARDAR clave nueva o actualizacion de roles
+                using (StreamWriter Writer = new StreamWriter(pathClaves, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Claves));
+                }
+                //en ambos casos se agrega a "padres", si no está logueado o si tiene este nuevo rol
+                Padres.ToList().Add(padre);
+                Padres.ToArray();
+                using (StreamWriter Writer = new StreamWriter(pathPadres, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Padres));
+                }
+            }
+            else //no tiene permiso
+            {
+                errores.Add("No  está autorizado para dar de alta a Padre/Madre");
+            }
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
