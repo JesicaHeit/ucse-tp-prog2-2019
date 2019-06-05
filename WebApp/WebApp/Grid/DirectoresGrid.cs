@@ -5,6 +5,7 @@ using MVCGrid.Web;
 using Newtonsoft.Json;
 using System.Linq;
 using WebApp;
+using Implementación;
 
 namespace WebApp.Grid
 {
@@ -53,7 +54,7 @@ namespace WebApp.Grid
                       string globalSearch = options.GetAdditionalQueryOptionString("search");
                       UsuarioLogueado usuarioLogueado = JsonConvert.DeserializeObject<UsuarioLogueado>(options.GetPageParameterString("user"));
 
-                      IServicioWeb servicio = BaseController.CreateService();
+                      IServicioWeb servicio = new ImplementaciónService();
                       var data = servicio.ObtenerDirectoras(usuarioLogueado, options.PageIndex.Value, options.ItemsPerPage.Value, globalSearch);
 
 					  return new QueryResult<Directora>()
