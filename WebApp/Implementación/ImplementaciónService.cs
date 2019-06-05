@@ -10,9 +10,10 @@ namespace Implementación
 {
     public class ImplementaciónService : IServicioWeb
     {
-        public static LógicaGeneral Logica = new LógicaGeneral();
+        public static LógicaGeneral Logica { get; set; }
         public ImplementaciónService()
         {
+            Logica = new LógicaGeneral();
             Logica.CrearArchivos();
         }
 

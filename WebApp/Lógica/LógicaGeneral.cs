@@ -11,15 +11,15 @@ namespace Lógica
 {
     public class LógicaGeneral : IServicioWeb
     {
-        private List<Usuario> Usuarios { get; set; }
-        private List<Institucion> Instituciones { get; set; }
-        private List<Directora> Directores { get; set; }
-        private List<Docente> Docentes { get; set; }
-        private List<Padre> Padres { get; set; }
-        private List<Hijo> Alumnos { get; set; }
-        private List<Nota> Notas { get; set; }
-        private List<Sala> Salas { get; set; }
-        private List<Claves> Claves { get; set; }
+        public List<Usuario> Usuarios { get; set;}
+        public List<Institucion> Instituciones { get; set; }
+        public List<Directora> Directores { get; set; }
+        public List<Docente> Docentes { get; set; }
+        public List<Padre> Padres { get; set; }
+        public List<Hijo> Alumnos { get; set; }
+        public List<Nota> Notas { get; set; }
+        public List<Sala> Salas { get; set; }
+        public List<Claves> Claves { get; set; }
 
         public const string pathUsuarios = @"C:\Archivos\Usuarios.txt";
         public const string pathInstituciones = @"C:\Archivos\Instituciones.txt";
@@ -70,27 +70,27 @@ namespace Lógica
         //DESERIALIZACION DE ARCHIVOS
         public List<Usuario> LeerUsuarios()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Usuarios.txt"))
+            using (StreamReader leer = new StreamReader(pathUsuarios))
             {
                 string contenido = leer.ReadToEnd();
                 Usuarios = JsonConvert.DeserializeObject<List<Usuario>>(contenido);
             }
-            return Usuarios;
+            return Usuarios;           
         }
 
         public List<Directora> LeerDirectores()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Directores.txt"))
+            using (StreamReader leer = new StreamReader(pathDirectores))
             {
-                string contenido = leer.ReadToEnd();
-                Directores = JsonConvert.DeserializeObject<List<Directora>>(contenido);
+                    string contenido = leer.ReadToEnd();
+                    Directores = JsonConvert.DeserializeObject<List<Directora>>(contenido);
             }
-            return Directores;
+            return Directores;           
         }
 
         public List<Docente> LeerDocentes()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Docentes.txt"))
+            using (StreamReader leer = new StreamReader(pathDocentes))
             {
                 string contenido = leer.ReadToEnd();
                 Docentes = JsonConvert.DeserializeObject<List<Docente>>(contenido);
@@ -100,7 +100,7 @@ namespace Lógica
 
         public List<Padre> LeerPadres()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Padres.txt"))
+            using (StreamReader leer = new StreamReader(pathPadres))
             {
                 string contenido = leer.ReadToEnd();
                 Padres = JsonConvert.DeserializeObject<List<Padre>>(contenido);
@@ -110,7 +110,7 @@ namespace Lógica
 
         public List<Hijo> LeerAlumnos()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Alumnos.txt"))
+            using (StreamReader leer = new StreamReader(pathAlumnos))
             {
                 string contenido = leer.ReadToEnd();
                 Alumnos = JsonConvert.DeserializeObject<List<Hijo>>(contenido);
@@ -120,7 +120,7 @@ namespace Lógica
 
         public List<Institucion> LeerInstituciones()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Instituciones.txt"))
+            using (StreamReader leer = new StreamReader(pathInstituciones))
             {
                 string contenido = leer.ReadToEnd();
                 Instituciones = JsonConvert.DeserializeObject<List<Institucion>>(contenido);
@@ -130,7 +130,7 @@ namespace Lógica
 
         public List<Nota> LeerNotas()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Notas.txt"))
+            using (StreamReader leer = new StreamReader(pathNotas))
             {
                 string contenido = leer.ReadToEnd();
                 Notas = JsonConvert.DeserializeObject<List<Nota>>(contenido);
@@ -140,7 +140,7 @@ namespace Lógica
 
         public List<Sala> LeerSalas()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Salas.txt"))
+            using (StreamReader leer = new StreamReader(pathSalas))
             {
                 string contenido = leer.ReadToEnd();
                 Salas = JsonConvert.DeserializeObject<List<Sala>>(contenido);
@@ -150,7 +150,7 @@ namespace Lógica
 
         public List<Claves> LeerClaves()
         {
-            using (StreamReader leer = new StreamReader(@"C:\Archivos\Claves.txt"))
+            using (StreamReader leer = new StreamReader(pathClaves))
             {
                 string contenido = leer.ReadToEnd();
                 Claves = JsonConvert.DeserializeObject<List<Claves>>(contenido);
@@ -168,19 +168,41 @@ namespace Lógica
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
+            Usuario usuario = null;         
             List<string> errores = new List<string>();
-            directora.Id = Directores.Count + 1;
+            if (LeerDirectores() == null)
+            {
+                directora.Id = 1;
+            }
+            else
+                directora.Id = LeerDirectores().Count + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
-                Usuarios = LeerUsuarios();
-                Usuario usuario = Usuarios.Where(x => x.Email == directora.Email).FirstOrDefault();
-                if (usuario == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
+                if (LeerUsuarios() != null)
+                    usuario = LeerUsuarios().Where(x => x.Email == directora.Email).FirstOrDefault();       
+                if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
                     Claves nueva = new Claves() {Email=directora.Email, Roles=new Roless[] {Roless.Directora}, Clave=rnd.Next(100000,999999).ToString() };//generar clave
-                    Claves.Add(nueva);
-                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO      
-                    Usuarios.Add(directora);
+                    if (LeerClaves() == null)
+                    {
+                        Claves = new List<Claves>();
+                        Claves.Add(nueva);
+                    }
+                    else
+                    {
+                        Claves.Add(nueva);
+                    }
+                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO   
+                    if (LeerUsuarios() == null)
+                    {
+                        Usuarios = new List<Usuario>();
+                        Usuarios.Add(directora);
+                    }
+                    else
+                    {
+                        Usuarios.Add(directora);
+                    }
                     using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
                     {
                         Writer.Write(JsonConvert.SerializeObject(Usuarios));
@@ -188,8 +210,7 @@ namespace Lógica
                 }
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
-                    Claves = LeerClaves();
-                    Claves clave = Claves.Where(x => x.Email == directora.Email).FirstOrDefault();
+                    Claves clave = LeerClaves().Where(x => x.Email == directora.Email).FirstOrDefault();
                     clave.Roles[clave.Roles.Length] = Roless.Directora;
                 }
                 //GUARDAR clave nueva o actualizacion de roles
@@ -198,8 +219,15 @@ namespace Lógica
                     Writer.Write(JsonConvert.SerializeObject(Claves));
                 }
                 //en ambos casos se agrega a "directores", si no está logueado o si tiene este nuevo rol
-                Directores = LeerDirectores();
-                Directores.Add(directora);
+                if (LeerDirectores() == null)
+                {
+                    Directores = new List<Directora>();
+                    Directores.Add(directora);            
+                }
+                else
+                {
+                    Directores.Add(directora);
+                }
                 using (StreamWriter Writer = new StreamWriter(pathDirectores, false)) 
                 {
                     Writer.Write(JsonConvert.SerializeObject(Directores));
@@ -218,6 +246,7 @@ namespace Lógica
             docente.Id = Docentes.Count() + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Docente) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
+
                 Usuario usuario = Usuarios.ToList().Where(x => x.Email == docente.Email).FirstOrDefault();
                 if (usuario == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
@@ -393,8 +422,22 @@ namespace Lógica
 
         public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
-
+            if (LeerAlumnos() == null)
+            {
+                return new Grilla<Hijo>()
+                {
+                    Lista = new List<Hijo>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                    .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = 0
+                };
+            }
+            else
+                return new Grilla<Hijo>()
+                {
+                    Lista = LeerAlumnos().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                        .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = LeerDirectores().Count
+                };
         }
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
@@ -409,13 +452,22 @@ namespace Lógica
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            return new Grilla<Directora>()
+            if (LeerDirectores() == null)
             {
-                Lista = Directores.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                return new Grilla<Directora>()
+                {
+                    Lista = new List<Directora>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
                                     .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
-                CantidadRegistros = Directores.Count()
-            };
-
+                    CantidadRegistros = 0
+                };
+            }
+            else          
+                return new Grilla<Directora>()
+                {
+                    Lista = LeerDirectores().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                        .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = LeerDirectores().Count
+                };
         }
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
@@ -425,8 +477,22 @@ namespace Lógica
 
         public Grilla<Docente> ObtenerDocentes(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
-
+            if (LeerDocentes() == null)
+            {
+                return new Grilla<Docente>()
+                {
+                    Lista = new List<Docente>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                    .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = 0
+                };
+            }
+            else
+                return new Grilla<Docente>()
+                {
+                    Lista = LeerDocentes().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                        .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = LeerDirectores().Count
+                };
         }
 
         public Institucion[] ObtenerInstituciones()
@@ -446,8 +512,22 @@ namespace Lógica
 
         public Grilla<Padre> ObtenerPadres(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
-
+            if (LeerPadres() == null)
+            {
+                return new Grilla<Padre>()
+                {
+                    Lista = new List<Padre>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                    .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = 0
+                };
+            }
+            else
+                return new Grilla<Padre>()
+                {
+                    Lista = LeerPadres().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                                        .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
+                    CantidadRegistros = LeerDirectores().Count
+                };
         }
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
@@ -462,49 +542,44 @@ namespace Lógica
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
-            if (email == "directora@ucse.com" && clave == "123456")  //PARA PODER PROBAR
-                return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[] { Roles.Directora }, RolSeleccionado = Roles.Directora };
+            /*  if (email == "" || clave == "")
+                  return null;
+
+              if (email == "directora@ucse.com" && clave == "123456")
+                  return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[] { Roles.Directora }, RolSeleccionado = Roles.Directora };
+  */
+            Claves datos = LeerClaves().Where(x => x.Email == email && x.Clave == clave).FirstOrDefault();
+            if (datos != null)
+            { //NO PONE BIEN EL ROL
+                int c = 0;
+                UsuarioLogueado usuarioLogueado = new UsuarioLogueado();
+                usuarioLogueado.Roles = new Roles[3];
+                Usuario usu = LeerUsuarios().Where(x => x.Email == email).FirstOrDefault();
+                for (int i = 0; i < datos.Roles.Length; i++)
+                {
+                    if (datos.Roles[i] == Roless.Padre)
+                    {
+                        usuarioLogueado.Roles[c] = Roles.Padre;
+                        c = c + 1;
+                    }
+                    if (datos.Roles[i] == Roless.Docente)
+                    {
+                        usuarioLogueado.Roles[c] = Roles.Docente;
+                        c = c + 1;
+                    }
+                    if (datos.Roles[i] == Roless.Directora)
+                    {
+                        usuarioLogueado.Roles[c] = Roles.Directora;
+                        c = c + 1;
+                    }
+                }
+                return new UsuarioLogueado() { Email = email, Nombre = usu.Nombre, Apellido = usu.Apellido };
+            }
             else
             {
-                if (email == "" || clave == "")
-                {
-                    return null;
-                }
-                else  //ver si la clave es correcta
-                {
-                    Claves datos = LeerClaves().Where(x => x.Email == email).FirstOrDefault();
-                    if (datos != null)
-                    {
-                        if (datos.Clave == clave)
-                        {
-                            Usuario user = Usuarios.Where(x => x.Email == email).FirstOrDefault();
-                            Roles[] roles = new Roles[] { };
-                            int c = 0;
-                            if (Directores.Where(x => x.Id == user.Id).FirstOrDefault() != null)
-                            {
-                                roles[c] = Roles.Directora;
-                                c = c + 1;
-                            }
-                            if (Padres.Where(x => x.Id == user.Id).FirstOrDefault() != null)
-                            {
-                                roles[c] = Roles.Padre;
-                                c = c + 1;
-                            }
-                            if (Docentes.Where(x => x.Id == user.Id).FirstOrDefault() != null)
-                            {
-                                roles[c] = Roles.Docente;
-                                c = c + 1;
-                            }
-                            return new UsuarioLogueado() { Email = email, Nombre = user.Nombre, Apellido = user.Apellido, Roles = roles };
-                        }
-                        else
-                            return null;
-                    }
-                    else
-                        return null;
-                }
+                return null;
             }
-            
+       
         }
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
