@@ -395,20 +395,6 @@ namespace Lógica
 
         }
 
-
-        /*LeerDirectores().RemoveAll(x=>x.Id == directora.Id);
-            LeerUsuarios().RemoveAll(x => x.Id == directora.Id);
-            using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(Directores));
-            }
-            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(Usuarios));
-            }
-            return new Resultado();*/
-
-
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
             throw new NotImplementedException();
