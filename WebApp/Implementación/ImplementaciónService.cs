@@ -146,12 +146,12 @@ namespace Implementación
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerDocentePorId(usuarioLogueado, id);
         }
 
         public Grilla<Docente> ObtenerDocentes(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerDocentes(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
 
         }
 
@@ -167,12 +167,12 @@ namespace Implementación
 
         public Padre ObtenerPadrePorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerPadrePorId(usuarioLogueado, id);
         }
 
         public Grilla<Padre> ObtenerPadres(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Logica.ObtenerPadres(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
 
         }
 
