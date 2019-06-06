@@ -364,9 +364,50 @@ namespace Lógica
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Directora nuevaDirectora = new Directora();
+            nuevaDirectora = ObtenerDirectoraPorId(usuarioLogueado, id);
+            Usuario nuevoUsuario = new Usuario();
+            nuevoUsuario = LeerUsuarios().Where(x => x.Id == directora.Id).FirstOrDefault();
+
+            nuevaDirectora.Id = id;
+            nuevaDirectora.Institucion = directora.Institucion;
+            nuevaDirectora.Nombre = directora.Nombre;
+            nuevaDirectora.FechaIngreso = directora.FechaIngreso;
+            nuevaDirectora.Email = directora.Email;
+            nuevaDirectora.Cargo = directora.Cargo;
+            nuevaDirectora.Apellido = directora.Apellido;
+            
+            nuevoUsuario.Id = directora.Id;
+            nuevoUsuario.Nombre = directora.Nombre;
+            nuevoUsuario.Apellido = directora.Apellido;
+            nuevoUsuario.Email = directora.Email;
+            
+            using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Directores));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+
+            return new Resultado();
 
         }
+
+
+        /*LeerDirectores().RemoveAll(x=>x.Id == directora.Id);
+            LeerUsuarios().RemoveAll(x => x.Id == directora.Id);
+            using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Directores));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            return new Resultado();*/
+
 
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {

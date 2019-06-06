@@ -66,7 +66,7 @@ namespace Implementación
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EditarDirectora(id, directora, usuarioLogueado);
 
         }
 
