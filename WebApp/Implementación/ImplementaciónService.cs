@@ -19,7 +19,7 @@ namespace Implementación
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.AltaDirectora(directora, usuarioLogueado);
+            return Logica.AltaDirectora(directora,usuarioLogueado);       
         }
 
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
@@ -29,97 +29,108 @@ namespace Implementación
 
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.AltaAlumno(hijo, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.AltaNota(nota, salas, hijos, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.AltaPadreMadre(padre, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.AsignarDocenteSala(docente, sala, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.AsignarHijoPadre(hijo, padre, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.DesasignarDocenteSala(docente, sala, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.DesasignarHijoPadre(hijo, padre, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
             return Logica.EditarDirectora(id, directora, usuarioLogueado);
+
         }
 
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.EditarAlumno(id, hijo, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado EditarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.EditarDocente(id, docente, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado EditarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.EditarPadreMadre(id, padre, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
             return Logica.EliminarDirectora(id, directora, usuarioLogueado);
+
         }
 
         public Resultado EliminarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.EliminarDocente(id, docente, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado EliminarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.EliminarPadreMadre(id, padre, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado EliminarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.EliminarAlumno(id, hijo, usuarioLogueado);
+            throw new NotImplementedException();
+
         }
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.MarcarNotaComoLeida(nota, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            return Logica.ObtenerAlumnoPorId(usuarioLogueado, id);
+            throw new NotImplementedException();
         }
 
         public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
             return Logica.ObtenerAlumnos(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
+
         }
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.ObtenerCuadernoComunicaciones(idPersona, usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
@@ -129,7 +140,8 @@ namespace Implementación
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            return Logica.ObtenerDirectoras(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
+              return Logica.ObtenerDirectoras(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
+       
         }
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
@@ -140,16 +152,17 @@ namespace Implementación
         public Grilla<Docente> ObtenerDocentes(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
             return Logica.ObtenerDocentes(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
+
         }
 
         public Institucion[] ObtenerInstituciones()
         {
-            return Logica.ObtenerInstituciones();
+            throw new NotImplementedException();
         }
 
         public string ObtenerNombreGrupo()
         {
-            return $"Albrecht - Heit - Llull";
+            return $"Repo original";
         }
 
         public Padre ObtenerPadrePorId(UsuarioLogueado usuarioLogueado, int id)
@@ -160,26 +173,28 @@ namespace Implementación
         public Grilla<Padre> ObtenerPadres(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
             return Logica.ObtenerPadres(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
+
         }
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
         {
-            return Logica.ObtenerPersonas(usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)
         {
-            return Logica.ObtenerSalasPorInstitucion(usuarioLogueado);
+            throw new NotImplementedException();
         }
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
             return Logica.ObtenerUsuario(email, clave);
+
         }
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
-            return Logica.ResponderNota(nota, nuevoComentario, usuarioLogueado);
+            throw new NotImplementedException();
         }
     }
 }

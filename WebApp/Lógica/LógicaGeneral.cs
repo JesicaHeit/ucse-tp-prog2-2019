@@ -483,19 +483,49 @@ namespace Lógica
 
         public Resultado EliminarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            LeerDocentes().RemoveAll(x => x.Id == docente.Id);
+            LeerUsuarios().RemoveAll(x => x.Id == docente.Id);
+            using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Docentes));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            return new Resultado();
 
         }
 
         public Resultado EliminarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            LeerPadres().RemoveAll(x => x.Id == padre.Id);
+            LeerUsuarios().RemoveAll(x => x.Id == padre.Id);
+            using (StreamWriter Writer = new StreamWriter(pathPadres, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Padres));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            return new Resultado();
 
         }
 
         public Resultado EliminarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            LeerAlumnos().RemoveAll(x => x.Id == hijo.Id);
+            LeerUsuarios().RemoveAll(x => x.Id == hijo.Id);
+            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Alumnos));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            return new Resultado();
 
         }
 
