@@ -168,7 +168,7 @@ namespace Lógica
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            Usuario usuario = null;         
+            Usuario usuario = null;
             List<string> errores = new List<string>();
             if (LeerDirectores() == null)
             {
@@ -179,11 +179,11 @@ namespace Lógica
             if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
                 if (LeerUsuarios() != null)
-                    usuario = LeerUsuarios().Where(x => x.Email == directora.Email).FirstOrDefault();       
+                    usuario = LeerUsuarios().Where(x => x.Email == directora.Email).FirstOrDefault();
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() {Email=directora.Email, Roles=new Roless[] {Roless.Directora}, Clave=rnd.Next(100000,999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { Email = directora.Email, Roles = new Roless[] { Roless.Directora }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -193,7 +193,6 @@ namespace Lógica
                     {
                         Claves.Add(nueva);
                     }
-                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO   
                     if (LeerUsuarios() == null)
                     {
                         Usuarios = new List<Usuario>();
@@ -211,7 +210,7 @@ namespace Lógica
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
                     Claves clave = LeerClaves().Where(x => x.Email == directora.Email).FirstOrDefault();
-                    clave.Roles[clave.Roles.Length] = Roless.Directora;
+                    clave.Roles.ToList().Add(Roless.Directora);
                 }
                 //GUARDAR clave nueva o actualizacion de roles
                 using (StreamWriter Writer = new StreamWriter(pathClaves, false))
@@ -222,13 +221,13 @@ namespace Lógica
                 if (LeerDirectores() == null)
                 {
                     Directores = new List<Directora>();
-                    Directores.Add(directora);            
+                    Directores.Add(directora);
                 }
                 else
                 {
                     Directores.Add(directora);
                 }
-                using (StreamWriter Writer = new StreamWriter(pathDirectores, false)) 
+                using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
                 {
                     Writer.Write(JsonConvert.SerializeObject(Directores));
                 }
@@ -237,25 +236,45 @@ namespace Lógica
             {
                 errores.Add("No  está autorizado para dar de alta a Directora");
             }
-            return new Resultado() {Errores= errores};
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
         {
+            Usuario usuario = null;
             List<string> errores = new List<string>();
-            docente.Id = Docentes.Count() + 1;
+            if (LeerDocentes() == null)
+            {
+                docente.Id = 1;
+            }
+            else
+                docente.Id = LeerDocentes().Count + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Docente) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
-
-                Usuario usuario = Usuarios.ToList().Where(x => x.Email == docente.Email).FirstOrDefault();
-                if (usuario == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
+                if (LeerUsuarios() != null)
+                    usuario = LeerUsuarios().Where(x => x.Email == docente.Email).FirstOrDefault();
+                if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
                     Claves nueva = new Claves() { Email = docente.Email, Roles = new Roless[] { Roless.Docente }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
-                    Claves.ToList().Add(nueva); //guardar clave 
-                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO              
-                    Usuarios.ToList().Add(docente);
-                    Usuarios.ToArray();
+                    if (LeerClaves() == null)
+                    {
+                        Claves = new List<Claves>();
+                        Claves.Add(nueva);
+                    }
+                    else
+                    {
+                        Claves.Add(nueva);
+                    }
+                    if (LeerUsuarios() == null)
+                    {
+                        Usuarios = new List<Usuario>();
+                        Usuarios.Add(docente);
+                    }
+                    else
+                    {
+                        Usuarios.Add(docente);
+                    }
                     using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
                     {
                         Writer.Write(JsonConvert.SerializeObject(Usuarios));
@@ -263,17 +282,24 @@ namespace Lógica
                 }
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
-                    Claves clave = Claves.ToList().Where(x => x.Email == docente.Email).FirstOrDefault();
-                    clave.Roles[clave.Roles.Count()] = Roless.Docente;
+                    Claves clave = LeerClaves().Where(x => x.Email == docente.Email).FirstOrDefault();
+                    clave.Roles[clave.Roles.Length] = Roless.Docente;
                 }
                 //GUARDAR clave nueva o actualizacion de roles
                 using (StreamWriter Writer = new StreamWriter(pathClaves, false))
                 {
                     Writer.Write(JsonConvert.SerializeObject(Claves));
                 }
-                //en ambos casos se agrega a "docentes", si no está logueado o si tiene este nuevo rol
-                Docentes.ToList().Add(docente);
-                Docentes.ToArray();
+                //en ambos casos se agrega a "directores", si no está logueado o si tiene este nuevo rol
+                if (LeerDocentes() == null)
+                {
+                    Directores = new List<Directora>();
+                    Docentes.Add(docente);
+                }
+                else
+                {
+                    Docentes.Add(docente);
+                }
                 using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
                 {
                     Writer.Write(JsonConvert.SerializeObject(Docentes));
@@ -287,9 +313,8 @@ namespace Lógica
         }
 
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
-        {
+        { //PREGUNTAR MAXI --> si solo lo puede hacer padre / directora / docente de su aula
             throw new NotImplementedException();
-
         }
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
@@ -299,19 +324,40 @@ namespace Lógica
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
         {
+            Usuario usuario = null;
             List<string> errores = new List<string>();
-            padre.Id = Directores.Count() + 1;
+            if (LeerPadres() == null)
+            {
+                padre.Id = 1;
+            }
+            else
+                padre.Id = LeerPadres().Count + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Padre) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
-                Usuario usuario = Usuarios.ToList().Where(x => x.Email == padre.Email).FirstOrDefault();
-                if (usuario == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
+                if (LeerUsuarios() != null)
+                    usuario = LeerUsuarios().Where(x => x.Email == padre.Email).FirstOrDefault();
+                if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
                     Claves nueva = new Claves() { Email = padre.Email, Roles = new Roless[] { Roless.Padre }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
-                    Claves.ToList().Add(nueva); //guardar clave 
-                    //guardar en archivo "usuarios"--> UNIFICAR EN UN MÉTODO              
-                    Usuarios.ToList().Add(padre);
-                    Usuarios.ToArray();
+                    if (LeerClaves() == null)
+                    {
+                        Claves = new List<Claves>();
+                        Claves.Add(nueva);
+                    }
+                    else
+                    {
+                        Claves.Add(nueva);
+                    }
+                    if (LeerUsuarios() == null)
+                    {
+                        Usuarios = new List<Usuario>();
+                        Usuarios.Add(padre);
+                    }
+                    else
+                    {
+                        Usuarios.Add(padre);
+                    }
                     using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
                     {
                         Writer.Write(JsonConvert.SerializeObject(Usuarios));
@@ -319,17 +365,24 @@ namespace Lógica
                 }
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
-                    Claves clave = Claves.ToList().Where(x => x.Email == padre.Email).FirstOrDefault();
-                    clave.Roles[clave.Roles.Count()] = Roless.Padre;
+                    Claves clave = LeerClaves().Where(x => x.Email == padre.Email).FirstOrDefault();
+                    clave.Roles[clave.Roles.Length] = Roless.Padre;
                 }
                 //GUARDAR clave nueva o actualizacion de roles
                 using (StreamWriter Writer = new StreamWriter(pathClaves, false))
                 {
                     Writer.Write(JsonConvert.SerializeObject(Claves));
                 }
-                //en ambos casos se agrega a "padres", si no está logueado o si tiene este nuevo rol
-                Padres.ToList().Add(padre);
-                Padres.ToArray();
+                //en ambos casos se agrega a "directores", si no está logueado o si tiene este nuevo rol
+                if (LeerPadres() == null)
+                {
+                    Padres = new List<Padre>();
+                    Padres.Add(padre);
+                }
+                else
+                {
+                    Padres.Add(padre);
+                }
                 using (StreamWriter Writer = new StreamWriter(pathPadres, false))
                 {
                     Writer.Write(JsonConvert.SerializeObject(Padres));
@@ -337,7 +390,7 @@ namespace Lógica
             }
             else //no tiene permiso
             {
-                errores.Add("No  está autorizado para dar de alta a Padre/Madre");
+                errores.Add("No  está autorizado para dar de alta a Directora");
             }
             return new Resultado() { Errores = errores };
         }
@@ -453,7 +506,7 @@ namespace Lógica
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return LeerAlumnos().Where(x => x.Id == id).FirstOrDefault();
         }
 
         public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
@@ -509,7 +562,7 @@ namespace Lógica
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return LeerDocentes().Where(x => x.Id == id).FirstOrDefault();
         }
 
         public Grilla<Docente> ObtenerDocentes(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
@@ -544,7 +597,7 @@ namespace Lógica
 
         public Padre ObtenerPadrePorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return LeerPadres().Where(x => x.Id == id).FirstOrDefault();
         }
 
         public Grilla<Padre> ObtenerPadres(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
@@ -579,44 +632,51 @@ namespace Lógica
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
+            /*  if (email == "directora@ucse.com" && clave == "123456")
+                  return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[]
+                  { Roles.Directora }, RolSeleccionado = Roles.Directora }; 
+                  */
             if (email == "" || clave == "")
-                  return null;
-
-              if (email == "directora@ucse.com" && clave == "123456")
-                  return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[] { Roles.Directora }, RolSeleccionado = Roles.Directora };
-  
-            Claves datos = LeerClaves().Where(x => x.Email == email && x.Clave == clave).FirstOrDefault();
-            if (datos != null)
-            { //NO PONE BIEN EL ROL
-                int c = 0;
-                UsuarioLogueado usuarioLogueado = new UsuarioLogueado();
-                usuarioLogueado.Roles = new Roles[3];
-                Usuario usu = LeerUsuarios().Where(x => x.Email == email).FirstOrDefault();
-                for (int i = 0; i < datos.Roles.Length; i++)
-                {
-                    if (datos.Roles[i] == Roless.Padre)
-                    {
-                        usuarioLogueado.Roles[c] = Roles.Padre;
-                        c = c + 1;
-                    }
-                    if (datos.Roles[i] == Roless.Docente)
-                    {
-                        usuarioLogueado.Roles[c] = Roles.Docente;
-                        c = c + 1;
-                    }
-                    if (datos.Roles[i] == Roless.Directora)
-                    {
-                        usuarioLogueado.Roles[c] = Roles.Directora;
-                        c = c + 1;
-                    }
-                }
-                return new UsuarioLogueado() { Email = email, Nombre = usu.Nombre, Apellido = usu.Apellido };
-            }
+                return null;
             else
             {
-                return null;
-            }
-       
+                if (email != "" && clave != "")
+                {
+                    Claves datos = LeerClaves().Where(x => x.Email == email && x.Clave == clave).FirstOrDefault();
+                    if (datos != null)
+                    {
+                        Usuario usuario = LeerUsuarios().Where(x => x.Email == email).FirstOrDefault();
+                        List<Roles> roles = new List<Roles>();
+                        UsuarioLogueado usuarioLog = new UsuarioLogueado();
+                        if (datos.Roles.ToList().Contains(Roless.Padre))
+                        {
+                            roles.Add(Roles.Padre);
+                            usuarioLog.RolSeleccionado = Roles.Padre;     // esto después SE CAMBIA, acá se usa si es solo 1 ROL
+                        }
+                        if (datos.Roles.ToList().Contains(Roless.Directora))
+                        {
+                            roles.Add(Roles.Directora);
+                            usuarioLog.RolSeleccionado = Roles.Directora;
+                        }
+                        if (datos.Roles.ToList().Contains(Roless.Docente))
+                        {
+                            roles.Add(Roles.Docente);
+                            usuarioLog.RolSeleccionado = Roles.Docente;
+                        }
+                        usuarioLog.Roles = roles.ToArray();
+                        usuarioLog.Email = email;
+                        usuarioLog.Nombre = usuario.Nombre;
+                        usuarioLog.Apellido = usuario.Apellido;
+                        return usuarioLog;                                            
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                    return null;               
+            }                   
         }
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)

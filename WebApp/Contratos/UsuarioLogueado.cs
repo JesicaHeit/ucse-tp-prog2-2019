@@ -2,7 +2,7 @@
 {
     public enum Roles
     {
-        Padre = 0, Directora = 1, Docente = 2
+        Padre, Directora, Docente
     }
 
     public class UsuarioLogueado
