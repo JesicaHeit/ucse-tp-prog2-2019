@@ -72,20 +72,19 @@ namespace Implementación
 
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EditarAlumno(id, hijo, usuarioLogueado);
 
         }
 
         public Resultado EditarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EditarDocente(id, docente, usuarioLogueado);
 
         }
 
         public Resultado EditarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
-
+            return Logica.EditarPadreMadre(id, padre, usuarioLogueado);
         }
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
@@ -96,19 +95,19 @@ namespace Implementación
 
         public Resultado EliminarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EliminarDocente(id, docente,usuarioLogueado);
 
         }
 
         public Resultado EliminarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EliminarPadreMadre(id, padre, usuarioLogueado);
 
         }
 
         public Resultado EliminarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Logica.EliminarAlumno(id, hijo, usuarioLogueado);
 
         }
 
