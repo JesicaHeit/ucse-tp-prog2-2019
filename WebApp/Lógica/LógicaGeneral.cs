@@ -249,7 +249,7 @@ namespace Lógica
             }
             else
                 docente.Id = LeerDocentes().Count + 1;
-            if (usuarioLogueado.RolSeleccionado == Roles.Docente) //tiene permiso --> ver si ya está logueado con OTRO ROL
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
                 if (LeerUsuarios() != null)
                     usuario = LeerUsuarios().Where(x => x.Email == docente.Email).FirstOrDefault();
@@ -332,7 +332,7 @@ namespace Lógica
             }
             else
                 padre.Id = LeerPadres().Count + 1;
-            if (usuarioLogueado.RolSeleccionado == Roles.Padre) //tiene permiso --> ver si ya está logueado con OTRO ROL
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
                 if (LeerUsuarios() != null)
                     usuario = LeerUsuarios().Where(x => x.Email == padre.Email).FirstOrDefault();
@@ -397,12 +397,31 @@ namespace Lógica
 
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<string> errores = new List<string>();
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+            {
+                    
+                //
+            }
+            else //no tiene permiso
+            {
+                errores.Add("No  está autorizado para realizar la acción que desea");
+            }
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<string> errores = new List<string>();
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+            {
+
+            }
+            else //no tiene permiso
+            {
+                errores.Add("No  está autorizado para realizar la acción que desea");
+            }
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
