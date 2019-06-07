@@ -13,6 +13,7 @@ namespace Lógica
 
     public class Claves
     {
+        public int ID { get; set; }
         public string Clave { get; set; }
         public string Email { get; set; }
         public Roless[] Roles { get; set; }

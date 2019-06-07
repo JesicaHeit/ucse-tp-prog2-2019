@@ -440,7 +440,11 @@ namespace Lógica
             nuevaDirectora = ObtenerDirectoraPorId(usuarioLogueado, id);
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario = LeerUsuarios().Where(x => x.Id == directora.Id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
 
+            if (nuevaClave != null)
+                nuevaClave.Email = directora.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
+            
             nuevaDirectora.Id = id;
             nuevaDirectora.Institucion = directora.Institucion;
             nuevaDirectora.Nombre = directora.Nombre;
@@ -462,6 +466,10 @@ namespace Lógica
             {
                 Writer.Write(JsonConvert.SerializeObject(Usuarios));
             }
+            using (StreamWriter Writer = new StreamWriter(pathClaves, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Claves));
+            }
 
             return new Resultado();
 
@@ -469,19 +477,121 @@ namespace Lógica
 
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Hijo nuevoHijo = new Hijo();
+            nuevoHijo = ObtenerAlumnoPorId(usuarioLogueado, id);
+            Usuario nuevoUsuario = new Usuario();
+            nuevoUsuario = LeerUsuarios().Where(x => x.Id == hijo.Id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
+
+            if (nuevaClave != null)
+                nuevaClave.Email = hijo.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
+
+            nuevoHijo.Id = id;
+            nuevoHijo.Institucion = hijo.Institucion;
+            nuevoHijo.Nombre = hijo.Nombre;
+            nuevoHijo.FechaNacimiento = hijo.FechaNacimiento;
+            nuevoHijo.Sala = hijo.Sala;
+            nuevoHijo.ResultadoUltimaEvaluacionAnual = hijo.ResultadoUltimaEvaluacionAnual;
+            nuevoHijo.Email = hijo.Email;
+            nuevoHijo.Apellido = hijo.Apellido;
+            
+            nuevoUsuario.Id = hijo.Id;
+            nuevoUsuario.Nombre = hijo.Nombre;
+            nuevoUsuario.Apellido = hijo.Apellido;
+            nuevoUsuario.Email = hijo.Email;
+            
+            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Alumnos));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathClaves, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Claves));
+            }
+
+            return new Resultado();
 
         }
 
         public Resultado EditarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Docente nuevoDocente = new Docente();
+            nuevoDocente = ObtenerDocentePorId(usuarioLogueado, id);
+            Usuario nuevoUsuario = new Usuario();
+            nuevoUsuario = LeerUsuarios().Where(x => x.Id == docente.Id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
+
+            if (nuevaClave != null)
+                nuevaClave.Email = docente.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
+
+            nuevoDocente.Id = id;
+            nuevoDocente.Apellido = docente.Apellido;
+            nuevoDocente.Email = docente.Email;
+            nuevoDocente.Nombre = docente.Nombre;
+            nuevoDocente.Salas = docente.Salas;
+
+            nuevoUsuario.Id = docente.Id;
+            nuevoUsuario.Nombre = docente.Nombre;
+            nuevoUsuario.Apellido = docente.Apellido;
+            nuevoUsuario.Email = docente.Email;
+
+            using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Docentes));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathClaves, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Claves));
+            }
+
+            return new Resultado();
 
         }
 
         public Resultado EditarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Padre nuevoPadre = new Padre();
+            nuevoPadre = ObtenerPadrePorId(usuarioLogueado, id);
+            Usuario nuevoUsuario = new Usuario();
+            nuevoUsuario = LeerUsuarios().Where(x => x.Id == padre.Id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
+
+            if (nuevaClave != null)
+                nuevaClave.Email = padre.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
+
+            nuevoPadre.Id = id;
+            nuevoPadre.Apellido = padre.Apellido;
+            nuevoPadre.Email = padre.Email;
+            nuevoPadre.Nombre = padre.Nombre;
+            nuevoPadre.Hijos = padre.Hijos;
+
+            nuevoUsuario.Id = padre.Id;
+            nuevoUsuario.Nombre = padre.Nombre;
+            nuevoUsuario.Apellido = padre.Apellido;
+            nuevoUsuario.Email = padre.Email;
+
+            using (StreamWriter Writer = new StreamWriter(pathPadres, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Padres));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Usuarios));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathClaves, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Claves));
+            }
+
+            return new Resultado();
 
         }
 
@@ -681,10 +791,10 @@ namespace Lógica
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
-            /*  if (email == "directora@ucse.com" && clave == "123456")
+            /*if (email == "directora@ucse.com" && clave == "123456")
                   return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[]
-                  { Roles.Directora }, RolSeleccionado = Roles.Directora }; 
-                  */
+                  { Roles.Directora }, RolSeleccionado = Roles.Directora }; */
+
             if (email == "" || clave == "")
                 return null;
             else
