@@ -1,0 +1,1 @@
+[{"Id":1,"Nombre":"Aula 1"},{"Id":2,"Nombre":"Aula 2"},{"Id":3,"Nombre":"Aula 3"},{"Id":4,"Nombre":"Aula 4"},{"Id":5,"Nombre":"Aula 5"}]

@@ -170,12 +170,12 @@ namespace Lógica
         {
             Usuario usuario = null;
             List<string> errores = new List<string>();
-            if (LeerDirectores() == null)
+            if (LeerUsuarios() == null)
             {
                 directora.Id = 1;
             }
             else
-                directora.Id = LeerDirectores().Count + 1;
+                directora.Id = LeerUsuarios().Count + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
                 if (LeerUsuarios() != null)
@@ -183,7 +183,7 @@ namespace Lógica
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() { Email = directora.Email, Roles = new Roless[] { Roless.Directora }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { ID = directora.Id, Email = directora.Email, Roles = new Roless[] { Roless.Directora }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -243,12 +243,12 @@ namespace Lógica
         {
             Usuario usuario = null;
             List<string> errores = new List<string>();
-            if (LeerDocentes() == null)
+            if (LeerUsuarios() == null)
             {
                 docente.Id = 1;
             }
             else
-                docente.Id = LeerDocentes().Count + 1;
+                docente.Id = LeerUsuarios().Count + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
                 if (LeerUsuarios() != null)
@@ -256,7 +256,7 @@ namespace Lógica
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() { Email = docente.Email, Roles = new Roless[] { Roless.Docente }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { ID = docente.Id, Email = docente.Email, Roles = new Roless[] { Roless.Docente }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -313,8 +313,55 @@ namespace Lógica
         }
 
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
-        { //PREGUNTAR MAXI --> si solo lo puede hacer padre / directora / docente de su aula
-            throw new NotImplementedException();
+        {
+            Usuario usuario = null;
+            List<string> errores = new List<string>();
+            if (LeerUsuarios() == null)
+            {
+                hijo.Id = 1;
+            }
+            else
+                hijo.Id = LeerUsuarios().Count + 1;
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso 
+            {
+                if (LeerUsuarios() != null)
+                    usuario = LeerUsuarios().Where(x => x.Email == hijo.Email).FirstOrDefault();
+                if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
+                {             
+                    if (LeerUsuarios() == null)
+                    {
+                        Usuarios = new List<Usuario>();
+                        Usuarios.Add(hijo);
+                    }
+                    else
+                    {
+                        Usuarios.Add(hijo);
+                    }
+                    using (StreamWriter Writer = new StreamWriter(pathUsuarios, false))
+                    {
+                        Writer.Write(JsonConvert.SerializeObject(Usuarios));
+                    }
+                }
+                
+                if (LeerAlumnos() == null)
+                {
+                    Alumnos = new List<Hijo>();
+                    Alumnos.Add(hijo);
+                }
+                else
+                {
+                    Alumnos.Add(hijo);
+                }
+                using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Alumnos));
+                }
+            }
+            else //no tiene permiso
+            {
+                errores.Add("No está autorizado para dar de alta a Alumno");
+            }
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
@@ -326,12 +373,12 @@ namespace Lógica
         {
             Usuario usuario = null;
             List<string> errores = new List<string>();
-            if (LeerPadres() == null)
+            if (LeerUsuarios() == null)
             {
                 padre.Id = 1;
             }
             else
-                padre.Id = LeerPadres().Count + 1;
+                padre.Id = LeerUsuarios().Count + 1;
             if (usuarioLogueado.RolSeleccionado == Roles.Directora) //tiene permiso --> ver si ya está logueado con OTRO ROL
             {
                 if (LeerUsuarios() != null)
@@ -339,7 +386,7 @@ namespace Lógica
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() { Email = padre.Email, Roles = new Roless[] { Roless.Padre }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { ID = padre.Id, Email = padre.Email, Roles = new Roless[] { Roless.Padre }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -400,14 +447,37 @@ namespace Lógica
             List<string> errores = new List<string>();
             if (usuarioLogueado.RolSeleccionado == Roles.Directora)
             {
-                    
-                //
+                var salasDocente = docente.Salas != null ? docente.Salas.ToList() : new List<Sala>();
+
+                if (salasDocente.Any(x => x.Id == sala.Id) == false) //si no la tiene ya asignada, la asigna y agrega a lista de salas
+                {
+                    salasDocente.Add(sala);
+                    if (LeerSalas() == null)
+                    {
+                        LeerSalas().Add(sala);
+                    }
+                    else
+                    {
+                        if (LeerSalas().Where(x => x.Id == sala.Id).FirstOrDefault() == null) //si la sala no está en la lista de todas, la agrega
+                        {
+                            LeerSalas().Add(sala);
+                        }
+                    }            
+                }
+              
+                docente.Salas = salasDocente.ToArray();
+                //escribir en docentes para actualizar salas
+                using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Docentes));
+                }
+                return new Resultado();
             }
-            else //no tiene permiso
+            else
             {
                 errores.Add("No  está autorizado para realizar la acción que desea");
             }
-            return new Resultado() { Errores = errores };
+            return new Resultado() { Errores = errores }; 
         }
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -415,7 +485,17 @@ namespace Lógica
             List<string> errores = new List<string>();
             if (usuarioLogueado.RolSeleccionado == Roles.Directora)
             {
+                var hijosPadre = padre.Hijos != null ? padre.Hijos.ToList() : new List<Hijo>();
 
+                if (hijosPadre.Any(x => x.Id == hijo.Id) == false)
+                    hijosPadre.Add(hijo);              
+
+                padre.Hijos = hijosPadre.ToArray();
+
+                using (StreamWriter Writer = new StreamWriter(pathPadres, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Padres));
+                }
             }
             else //no tiene permiso
             {
@@ -426,12 +506,52 @@ namespace Lógica
 
         public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<string> errores = new List<string>();
+
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+            {
+                var salasDocente = docente.Salas != null ? docente.Salas.ToList() : new List<Sala>();
+
+                if (salasDocente.Any(x => x.Id == sala.Id) == true)
+                    salasDocente.Remove(sala);
+
+                docente.Salas = salasDocente.ToArray();
+
+                using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Docentes));
+                }
+            }
+            else
+            {
+                errores.Add("No  está autorizado para realizar la acción que desea");
+            }
+            return new Resultado() { Errores = errores };          
         }
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<string> errores = new List<string>();
+
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+            {
+                var hijosPadre = padre.Hijos != null ? padre.Hijos.ToList() : new List<Hijo>();
+
+                if (hijosPadre.Any(x => x.Id == hijo.Id) == true)
+                    hijosPadre.Remove(hijo);
+
+                padre.Hijos = hijosPadre.ToArray();
+
+                using (StreamWriter Writer = new StreamWriter(pathPadres, false))
+                {
+                    Writer.Write(JsonConvert.SerializeObject(Padres));
+                }
+            }
+            else
+            {
+                errores.Add("No  está autorizado para realizar la acción que desea");
+            }
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
@@ -444,7 +564,7 @@ namespace Lógica
 
             if (nuevaClave != null)
                 nuevaClave.Email = directora.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
-            
+                       
             nuevaDirectora.Id = id;
             nuevaDirectora.Institucion = directora.Institucion;
             nuevaDirectora.Nombre = directora.Nombre;
@@ -786,7 +906,13 @@ namespace Lógica
 
         public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            if (LeerSalas() == null)
+            {
+                Salas = new List<Sala>();
+                return Salas.ToArray();
+            }
+            else
+                return LeerSalas().ToArray();
         }
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
