@@ -11,7 +11,7 @@ namespace Lógica
 {
     public class LógicaGeneral : IServicioWeb
     {
-        public List<Usuario> Usuarios { get; set;}
+        public List<Usuario> Usuarios { get; set; }
         public List<Institucion> Instituciones { get; set; }
         public List<Directora> Directores { get; set; }
         public List<Docente> Docentes { get; set; }
@@ -75,17 +75,17 @@ namespace Lógica
                 string contenido = leer.ReadToEnd();
                 Usuarios = JsonConvert.DeserializeObject<List<Usuario>>(contenido);
             }
-            return Usuarios;           
+            return Usuarios;
         }
 
         public List<Directora> LeerDirectores()
         {
             using (StreamReader leer = new StreamReader(pathDirectores))
             {
-                    string contenido = leer.ReadToEnd();
-                    Directores = JsonConvert.DeserializeObject<List<Directora>>(contenido);
+                string contenido = leer.ReadToEnd();
+                Directores = JsonConvert.DeserializeObject<List<Directora>>(contenido);
             }
-            return Directores;           
+            return Directores;
         }
 
         public List<Docente> LeerDocentes()
@@ -327,7 +327,7 @@ namespace Lógica
                 if (LeerUsuarios() != null)
                     usuario = LeerUsuarios().Where(x => x.Email == hijo.Email).FirstOrDefault();
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
-                {             
+                {
                     if (LeerUsuarios() == null)
                     {
                         Usuarios = new List<Usuario>();
@@ -342,7 +342,7 @@ namespace Lógica
                         Writer.Write(JsonConvert.SerializeObject(Usuarios));
                     }
                 }
-                
+
                 if (LeerAlumnos() == null)
                 {
                     Alumnos = new List<Hijo>();
@@ -462,9 +462,9 @@ namespace Lógica
                         {
                             LeerSalas().Add(sala);
                         }
-                    }            
+                    }
                 }
-              
+
                 docente.Salas = salasDocente.ToArray();
                 //escribir en docentes para actualizar salas
                 using (StreamWriter Writer = new StreamWriter(pathDocentes, false))
@@ -477,7 +477,7 @@ namespace Lógica
             {
                 errores.Add("No  está autorizado para realizar la acción que desea");
             }
-            return new Resultado() { Errores = errores }; 
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -488,7 +488,7 @@ namespace Lógica
                 var hijosPadre = padre.Hijos != null ? padre.Hijos.ToList() : new List<Hijo>();
 
                 if (hijosPadre.Any(x => x.Id == hijo.Id) == false)
-                    hijosPadre.Add(hijo);              
+                    hijosPadre.Add(hijo);
 
                 padre.Hijos = hijosPadre.ToArray();
 
@@ -526,7 +526,7 @@ namespace Lógica
             {
                 errores.Add("No  está autorizado para realizar la acción que desea");
             }
-            return new Resultado() { Errores = errores };          
+            return new Resultado() { Errores = errores };
         }
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -564,7 +564,7 @@ namespace Lógica
 
             if (nuevaClave != null)
                 nuevaClave.Email = directora.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
-                       
+
             nuevaDirectora.Id = id;
             nuevaDirectora.Institucion = directora.Institucion;
             nuevaDirectora.Nombre = directora.Nombre;
@@ -572,12 +572,12 @@ namespace Lógica
             nuevaDirectora.Email = directora.Email;
             nuevaDirectora.Cargo = directora.Cargo;
             nuevaDirectora.Apellido = directora.Apellido;
-            
+
             nuevoUsuario.Id = directora.Id;
             nuevoUsuario.Nombre = directora.Nombre;
             nuevoUsuario.Apellido = directora.Apellido;
             nuevoUsuario.Email = directora.Email;
-            
+
             using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
             {
                 Writer.Write(JsonConvert.SerializeObject(Directores));
@@ -610,12 +610,12 @@ namespace Lógica
             nuevoHijo.ResultadoUltimaEvaluacionAnual = hijo.ResultadoUltimaEvaluacionAnual;
             nuevoHijo.Email = hijo.Email;
             nuevoHijo.Apellido = hijo.Apellido;
-            
+
             nuevoUsuario.Id = hijo.Id;
             nuevoUsuario.Nombre = hijo.Nombre;
             nuevoUsuario.Apellido = hijo.Apellido;
             nuevoUsuario.Email = hijo.Email;
-            
+
             using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
             {
                 Writer.Write(JsonConvert.SerializeObject(Alumnos));
@@ -624,7 +624,7 @@ namespace Lógica
             {
                 Writer.Write(JsonConvert.SerializeObject(Usuarios));
             }
-           
+
             return new Resultado();
 
         }
@@ -708,8 +708,8 @@ namespace Lógica
         }
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
-        {            
-            LeerDirectores().RemoveAll(x=>x.Id == directora.Id);
+        {
+            LeerDirectores().RemoveAll(x => x.Id == directora.Id);
             LeerUsuarios().RemoveAll(x => x.Id == directora.Id);
             using (StreamWriter Writer = new StreamWriter(pathDirectores, false))
             {
@@ -772,7 +772,22 @@ namespace Lógica
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            if (usuarioLogueado.RolSeleccionado == 0)
+            {
+                Padre nuevopadre = new Padre();
+                nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                foreach (Hijo hijo in nuevopadre.Hijos)
+                {
+                    Nota nota1 = hijo.Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
+                    if (nota1 != null)
+                    {
+                        nota1.Leida = true;
+                        break;
+                    }
+
+                }
+            }
+            return new Resultado();
         }
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
@@ -808,7 +823,7 @@ namespace Lógica
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
         {
             return LeerDirectores().Where(x => x.Id == id).FirstOrDefault();
-            
+
         }
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
@@ -822,7 +837,7 @@ namespace Lógica
                     CantidadRegistros = 0
                 };
             }
-            else          
+            else
                 return new Grilla<Directora>()
                 {
                     Lista = LeerDirectores().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
@@ -944,7 +959,7 @@ namespace Lógica
                         usuarioLog.Email = email;
                         usuarioLog.Nombre = usuario.Nombre;
                         usuarioLog.Apellido = usuario.Apellido;
-                        return usuarioLog;                                            
+                        return usuarioLog;
                     }
                     else
                     {
@@ -952,14 +967,30 @@ namespace Lógica
                     }
                 }
                 else
-                    return null;               
-            }                   
+                    return null;
+            }
         }
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
-        }
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre)
+            {
+                Padre nuevopadre = new Padre();
+                nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                foreach (Hijo hijo in nuevopadre.Hijos)
+                {
+                    Nota nota1 = hijo.Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
+                    string nota2 = nota1.Comentarios[].Mensaje;
+                    if (nota1 != null)
+                    {
+                        nota2 = nuevoComentario.Mensaje;
+                        break;
+                    }
 
+                }
+            }
+            /* TERMINAR EL ALTA DE DOCENTES Y DIRECTORESSSSSS*/
+            return new Resultado();
+        }
     }
 }
