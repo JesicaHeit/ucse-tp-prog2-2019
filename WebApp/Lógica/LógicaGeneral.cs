@@ -293,7 +293,7 @@ namespace Lógica
                 //en ambos casos se agrega a "directores", si no está logueado o si tiene este nuevo rol
                 if (LeerDocentes() == null)
                 {
-                    Directores = new List<Directora>();
+                    Docentes = new List<Docente>();
                     Docentes.Add(docente);
                 }
                 else
