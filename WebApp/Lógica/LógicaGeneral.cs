@@ -560,7 +560,7 @@ namespace Lógica
             nuevaDirectora = ObtenerDirectoraPorId(usuarioLogueado, id);
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario = LeerUsuarios().Where(x => x.Id == directora.Id).FirstOrDefault();
-            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == directora.Id).FirstOrDefault();
 
             if (nuevaClave != null)
                 nuevaClave.Email = directora.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
@@ -601,10 +601,6 @@ namespace Lógica
             nuevoHijo = ObtenerAlumnoPorId(usuarioLogueado, id);
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario = LeerUsuarios().Where(x => x.Id == hijo.Id).FirstOrDefault();
-            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
-
-            if (nuevaClave != null)
-                nuevaClave.Email = hijo.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
 
             nuevoHijo.Id = id;
             nuevoHijo.Institucion = hijo.Institucion;
@@ -628,11 +624,7 @@ namespace Lógica
             {
                 Writer.Write(JsonConvert.SerializeObject(Usuarios));
             }
-            using (StreamWriter Writer = new StreamWriter(pathClaves, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(Claves));
-            }
-
+           
             return new Resultado();
 
         }
@@ -643,7 +635,7 @@ namespace Lógica
             nuevoDocente = ObtenerDocentePorId(usuarioLogueado, id);
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario = LeerUsuarios().Where(x => x.Id == docente.Id).FirstOrDefault();
-            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == docente.Id).FirstOrDefault();
 
             if (nuevaClave != null)
                 nuevaClave.Email = docente.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
@@ -682,7 +674,7 @@ namespace Lógica
             nuevoPadre = ObtenerPadrePorId(usuarioLogueado, id);
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario = LeerUsuarios().Where(x => x.Id == padre.Id).FirstOrDefault();
-            Claves nuevaClave = LeerClaves().Where(x => x.ID == id).FirstOrDefault();
+            Claves nuevaClave = LeerClaves().Where(x => x.ID == padre.Id).FirstOrDefault();
 
             if (nuevaClave != null)
                 nuevaClave.Email = padre.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
