@@ -817,7 +817,71 @@ namespace Lógica
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Nota[] arrayNotas = new Nota[] { };
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre) //padre. que vea solo lo de sus hijos.
+            {
+                int c = 0;
+                Padre nuevoPadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                foreach (Hijo hijo in nuevoPadre.Hijos)
+                {
+                    if (hijo.Id == idPersona)
+                    {
+                        foreach (Nota nota in Notas)
+                        {
+                            foreach (Nota nota2 in hijo.Notas)
+                            {
+                                if (nota == nota2)
+                                {
+                                    arrayNotas[c] = nota;
+                                    c = c + 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora) //directora. todos, no se debería validar nada
+            {
+                int c = 0;
+                Hijo nuevoAlumno = LeerAlumnos().Where(x => x.Id == idPersona).FirstOrDefault();
+                foreach (Nota nota in Notas)
+                {
+                    foreach (Nota nota2 in nuevoAlumno.Notas)
+                    {
+                        if (nota == nota2)
+                        {
+                            arrayNotas[c] = nota;
+                            c = c + 1;
+                        }
+                    }
+                }
+            }
+            if (usuarioLogueado.RolSeleccionado == Roles.Docente) //docente. ve solo lo de sus clases
+            {
+                int c = 0;
+                Hijo nuevoAlumno = LeerAlumnos().Where(x => x.Id == idPersona).FirstOrDefault();
+                Docente nuevaDocente = LeerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                foreach (Sala sala in nuevaDocente.Salas)
+                {
+                    if (nuevoAlumno.Sala == sala)
+                    {
+                        foreach(Nota nota in Notas)
+                        {
+                            foreach (Nota nota2 in nuevoAlumno.Notas)
+                            {
+                                if (nota == nota2)
+                                {
+                                    arrayNotas[c] = nota;
+                                    c = c + 1;
+                                }
+                            }
+                          
+                        }
+                    }
+                }
+            }
+            return arrayNotas;
+            
         }
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
