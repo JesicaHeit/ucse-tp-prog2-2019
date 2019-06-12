@@ -366,7 +366,70 @@ namespace Lógica
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            // se ejecuta una vez. si es directora o docente, que lo mande a todas las salas 
+            //o a alguna particular. una o mas . salas llega cuando es directora o docente hijos [] cuando el usuario seleccione.
+            //si se queda en salas genera una nota por cada alumno de la s sala s. SIEMPRE SE GUARDA EN HIJOS.
+            List<string> errores = new List<string>();
+            if ((usuarioLogueado.RolSeleccionado == Roles.Directora)||(usuarioLogueado.RolSeleccionado == Roles.Docente))//directora o docente
+            {
+                if (salas != null && hijos == null) //seleccionó solo salas
+                {
+                    foreach (Sala s in salas)
+                    {
+                        if (salas.ToList().Contains(s)) //si la sala fue seleccionada, agrega a cada uno de sus alumnos, la nota 
+                        {
+                            foreach (Hijo alumno in LeerAlumnos())
+                            {
+                                if (alumno.Sala == s)
+                                {
+                                    alumno.Notas.ToList().Add(nota);
+                                    alumno.Notas.ToArray();
+                                }
+                            }                    
+                        }
+                    }
+                }
+                else // seleccionó salas y alumnos de esas salas
+                {
+                    foreach (Sala s in salas)
+                    {
+                        if (salas.ToList().Contains(s)) // si la sala fue seleccionada, agrega a cada uno de sus alumnos seleccionados
+                        {
+                            foreach (Hijo alumno in LeerAlumnos())
+                            {
+                                if (alumno.Sala == s && hijos.ToList().Contains(alumno))
+                                {
+                                    alumno.Notas.ToList().Add(nota);
+                                }
+                            }
+                        }
+                    }
+                }              
+            }
+            else // es padre y seleccionó a alguno de sus hijos o todos
+            {
+                // buscar hijos de ese padre
+                Padre padre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                Hijo[] hijoss = padre.Hijos;
+                foreach (Hijo hijo in hijoss)
+                {
+                    if (hijos.Contains(hijo))
+                    {
+                        hijo.Notas.ToList().Add(nota);
+                    }
+                }
+            }
+            //Guardar datos
+            LeerNotas().Add(nota);
+            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Alumnos));
+            }
+            using (StreamWriter Writer = new StreamWriter(pathNotas, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Notas));
+            }
+            return new Resultado() { Errores = errores};
         }
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
@@ -896,7 +959,7 @@ namespace Lógica
             throw new NotImplementedException();
         }
 
-        public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)
+        public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)//salas del usuario log
         {
             if (LeerSalas() == null)
             {
