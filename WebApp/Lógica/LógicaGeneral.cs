@@ -430,6 +430,40 @@ namespace Lógica
                 Writer.Write(JsonConvert.SerializeObject(Notas));
             }
             return new Resultado() { Errores = errores};
+
+            /*
+             * if (hijos != null && hijos.Length > 0)
+            {
+                foreach (var item in hijos)
+                {
+                    var hijo = _alumnos.Single(x => x.Id == item.Id);
+                    var notasHijo = hijo.Notas == null ? new List<Nota>() : hijo.Notas.ToList();
+
+                    notasHijo.Add(nota);
+
+                    hijo.Notas = notasHijo.ToArray();
+                }
+            }
+            else
+            {
+                List<Hijo> alumnos = new List<Hijo>();
+                foreach (var sala in salas)
+                {
+                    alumnos.AddRange(_alumnos.Where(x => x.Sala.Id == sala.Id));
+                }
+
+                foreach (var item in alumnos)
+                {
+                    var notasHijo = item.Notas == null ? new List<Nota>() : item.Notas.ToList();
+
+                    notasHijo.Add(nota);
+
+                    item.Notas = notasHijo.ToArray();                    
+                }
+            }
+
+            return new Resultado();
+             */
         }
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
@@ -767,7 +801,6 @@ namespace Lógica
             }
 
             return new Resultado();
-
         }
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
@@ -814,7 +847,6 @@ namespace Lógica
                 Writer.Write(JsonConvert.SerializeObject(Usuarios));
             }
             return new Resultado();
-
         }
 
         public Resultado EliminarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
@@ -835,7 +867,7 @@ namespace Lógica
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
-            if (usuarioLogueado.RolSeleccionado == 0)
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre)
             {
                 Padre nuevopadre = new Padre();
                 nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
@@ -847,7 +879,6 @@ namespace Lógica
                         nota1.Leida = true;
                         break;
                     }
-
                 }
             }
             return new Resultado();
@@ -874,7 +905,7 @@ namespace Lógica
                 {
                     Lista = LeerAlumnos().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
-                    CantidadRegistros = LeerDirectores().Count
+                    CantidadRegistros = LeerAlumnos().Count
                 };
         }
 
@@ -994,7 +1025,7 @@ namespace Lógica
                 {
                     Lista = LeerDocentes().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
-                    CantidadRegistros = LeerDirectores().Count
+                    CantidadRegistros = LeerDocentes().Count
                 };
         }
 
@@ -1029,13 +1060,37 @@ namespace Lógica
                 {
                     Lista = LeerPadres().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
-                    CantidadRegistros = LeerDirectores().Count
+                    CantidadRegistros = LeerPadres().Count
                 };
         }
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            switch (usuarioLogueado.RolSeleccionado)
+            {
+                case Roles.Padre:
+                    return LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault().Hijos;
+                case Roles.Directora:
+                    return LeerAlumnos().ToArray();
+                case Roles.Docente: //devolver alumnos de todas sus aulas
+                    {
+                        List<Hijo> lista = new List<Hijo>();
+                        Docente docente = LeerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                        foreach (Sala sala in docente.Salas)
+                        {
+                            foreach (Hijo hijo in LeerAlumnos())
+                            {
+                                if (hijo.Sala == sala)
+                                {
+                                    lista.Add(hijo);
+                                }
+                            }
+                        }
+                        return lista.ToArray();
+                    }
+                default:
+                    throw new Exception("Rol no implementado");
+            }
         }
 
         public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)//salas del usuario log
@@ -1100,24 +1155,33 @@ namespace Lógica
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
+            List<string> errores = new List<string>();
             if (usuarioLogueado.RolSeleccionado == Roles.Padre)
             {
                 Padre nuevopadre = new Padre();
                 nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
                 foreach (Hijo hijo in nuevopadre.Hijos)
-                {
+                {                                          //buscar nota dentro de los arrays de notas de cada hijo
                     Nota nota1 = hijo.Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
-                    string nota2 = nota1.Comentarios[].Mensaje;
                     if (nota1 != null)
                     {
-                        nota2 = nuevoComentario.Mensaje;
+                        nota1.Comentarios.ToList().Add(nuevoComentario);
                         break;
                     }
-
                 }
             }
-            /* TERMINAR EL ALTA DE DOCENTES Y DIRECTORESSSSSS*/
-            return new Resultado();
+
+            if (usuarioLogueado.RolSeleccionado == Roles.Docente)
+            {
+
+            }
+
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+            {
+
+            }
+
+            return new Resultado() { Errores = errores};
         }
     }
 }
