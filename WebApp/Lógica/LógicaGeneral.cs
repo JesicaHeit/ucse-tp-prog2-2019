@@ -21,6 +21,7 @@ namespace Lógica
         public List<Sala> Salas { get; set; }
         public List<Claves> Claves { get; set; }
 
+        //Path.Combine(Appdomain.CurrentDomain.BaseDirectory, Usuarios);
         public const string pathUsuarios = @"C:\Archivos\Usuarios.txt";
         public const string pathInstituciones = @"C:\Archivos\Instituciones.txt";
         public const string pathDirectores = @"C:\Archivos\Directores.txt";
@@ -382,6 +383,10 @@ namespace Lógica
                             {
                                 if (alumno.Sala == s)
                                 {
+                                    if (alumno.Notas == null)
+                                    {
+                                        alumno.Notas = new Nota[] { };
+                                    }
                                     alumno.Notas.ToList().Add(nota);
                                     alumno.Notas.ToArray();
                                 }
@@ -398,8 +403,13 @@ namespace Lógica
                             foreach (Hijo alumno in LeerAlumnos())
                             {
                                 if (alumno.Sala == s && hijos.ToList().Contains(alumno))
-                                {
+                                {  
+                                    if (alumno.Notas == null)
+                                    {
+                                        alumno.Notas = new Nota[] { };
+                                    }
                                     alumno.Notas.ToList().Add(nota);
+                                    alumno.Notas.ToArray();
                                 }
                             }
                         }
@@ -415,19 +425,35 @@ namespace Lógica
                 {
                     if (hijos.Contains(hijo))
                     {
+                        if (hijo.Notas == null)
+                        {
+                            hijo.Notas = new Nota[] { };
+                        }
                         hijo.Notas.ToList().Add(nota);
+                        hijo.Notas.ToArray();
                     }
                 }
             }
             //Guardar datos
-            LeerNotas().Add(nota);
-            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            List<Nota> notas = LeerNotas();
+            if (notas == null)
             {
-                Writer.Write(JsonConvert.SerializeObject(Alumnos));
+                notas = new List<Nota>();
+                notas.Add(nota);
             }
+            else
+            {
+                notas.Add(nota);
+            }
+
             using (StreamWriter Writer = new StreamWriter(pathNotas, false))
             {
-                Writer.Write(JsonConvert.SerializeObject(Notas));
+                Writer.Write(JsonConvert.SerializeObject(notas));
+            }
+
+            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(LeerAlumnos()));
             }
             return new Resultado() { Errores = errores};
 
@@ -1160,8 +1186,8 @@ namespace Lógica
             {
                 Padre nuevopadre = new Padre();
                 nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
-                foreach (Hijo hijo in nuevopadre.Hijos)
-                {                                          //buscar nota dentro de los arrays de notas de cada hijo
+                foreach (Hijo hijo in nuevopadre.Hijos) //buscar nota dentro de los arrays de notas de cada hijo
+                {                                          
                     Nota nota1 = hijo.Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
                     if (nota1 != null)
                     {
@@ -1170,17 +1196,20 @@ namespace Lógica
                     }
                 }
             }
-
-            if (usuarioLogueado.RolSeleccionado == Roles.Docente)
+            else
             {
+                if (usuarioLogueado.RolSeleccionado == Roles.Docente) //ver alumnos de sus salas
+                {
+                    Docente docente = new Docente();
+                }
+                else
+                {
+                    if (usuarioLogueado.RolSeleccionado == Roles.Directora) //ver todos los alumnos de la institución
+                    {
 
-            }
-
-            if (usuarioLogueado.RolSeleccionado == Roles.Directora)
-            {
-
-            }
-
+                    }
+                }
+            }          
             return new Resultado() { Errores = errores};
         }
     }
