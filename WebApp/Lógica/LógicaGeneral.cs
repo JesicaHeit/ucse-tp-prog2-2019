@@ -11,15 +11,15 @@ namespace Lógica
 {
     public class LógicaGeneral : IServicioWeb
     {
-        public List<Usuario> Usuarios { get; set; }
-        public List<Institucion> Instituciones { get; set; }
-        public List<Directora> Directores { get; set; }
-        public List<Docente> Docentes { get; set; }
-        public List<Padre> Padres { get; set; }
-        public List<Hijo> Alumnos { get; set; }
-        public List<Nota> Notas { get; set; }
-        public List<Sala> Salas { get; set; }
-        public List<Claves> Claves { get; set; }
+        private List<Usuario> Usuarios { get; set; }
+        private List<Institucion> Instituciones { get; set; }
+        private List<Directora> Directores { get; set; }
+        private List<Docente> Docentes { get; set; }
+        private List<Padre> Padres { get; set; }
+        private List<Hijo> Alumnos { get; set; }
+        private List<Nota> Notas { get; set; }
+        private List<Sala> Salas { get; set; }
+        private List<Claves> Claves { get; set; }
 
         //Path.Combine(Appdomain.CurrentDomain.BaseDirectory, Usuarios);
         public const string pathUsuarios = @"C:\Archivos\Usuarios.txt";
@@ -157,15 +157,7 @@ namespace Lógica
                 Claves = JsonConvert.DeserializeObject<List<Claves>>(contenido);
             }
             return Claves;
-        }
-
-        public void GuardarEnArchivo(string path, object[] array)
-        {
-            using (StreamWriter Writer = new StreamWriter(path, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(array));
-            }
-        }
+        }  
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
@@ -184,7 +176,7 @@ namespace Lógica
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() { ID = directora.Id, Email = directora.Email, Roles = new Roless[] { Roless.Directora }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { ID = directora.Id, Email = directora.Email, Roles = new Roless[3] { Roless.Directora, Roless.Nulo, Roless.Nulo}, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -211,7 +203,16 @@ namespace Lógica
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
                     Claves clave = LeerClaves().Where(x => x.Email == directora.Email).FirstOrDefault();
-                    clave.Roles.ToList().Add(Roless.Directora);
+                    int c = -1;
+                    foreach (Roless r in clave.Roles)
+                    {
+                        c = c + 1;
+                        if (r == Roless.Nulo)
+                        {
+                            clave.Roles[c] = Roless.Directora;
+                            break;
+                        }
+                    }
                 }
                 //GUARDAR clave nueva o actualizacion de roles
                 using (StreamWriter Writer = new StreamWriter(pathClaves, false))
@@ -257,7 +258,7 @@ namespace Lógica
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() { ID = docente.Id, Email = docente.Email, Roles = new Roless[] { Roless.Docente }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { ID = docente.Id, Email = docente.Email, Roles = new Roless[3] { Roless.Docente, Roless.Nulo, Roless.Nulo }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -280,17 +281,27 @@ namespace Lógica
                     {
                         Writer.Write(JsonConvert.SerializeObject(Usuarios));
                     }
+                   
                 }
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
                     Claves clave = LeerClaves().Where(x => x.Email == docente.Email).FirstOrDefault();
-                    clave.Roles[clave.Roles.Length] = Roless.Docente;
+                    int c = -1;
+                    foreach (Roless r in clave.Roles)
+                    {
+                        c = c + 1;
+                        if (r == Roless.Nulo)
+                        {
+                            clave.Roles[c] = Roless.Docente;
+                            break;
+                        }
+                    }
                 }
-                //GUARDAR clave nueva o actualizacion de roles
                 using (StreamWriter Writer = new StreamWriter(pathClaves, false))
                 {
                     Writer.Write(JsonConvert.SerializeObject(Claves));
                 }
+
                 //en ambos casos se agrega a "directores", si no está logueado o si tiene este nuevo rol
                 if (LeerDocentes() == null)
                 {
@@ -366,108 +377,26 @@ namespace Lógica
         }
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
-        {
-            // se ejecuta una vez. si es directora o docente, que lo mande a todas las salas 
-            //o a alguna particular. una o mas . salas llega cuando es directora o docente hijos [] cuando el usuario seleccione.
-            //si se queda en salas genera una nota por cada alumno de la s sala s. SIEMPRE SE GUARDA EN HIJOS.
+        { 
             List<string> errores = new List<string>();
-            if ((usuarioLogueado.RolSeleccionado == Roles.Directora)||(usuarioLogueado.RolSeleccionado == Roles.Docente))//directora o docente
+            if (LeerAlumnos() == null)
             {
-                if (salas != null && hijos == null) //seleccionó solo salas
-                {
-                    foreach (Sala s in salas)
-                    {
-                        if (salas.ToList().Contains(s)) //si la sala fue seleccionada, agrega a cada uno de sus alumnos, la nota 
-                        {
-                            foreach (Hijo alumno in LeerAlumnos())
-                            {
-                                if (alumno.Sala == s)
-                                {
-                                    if (alumno.Notas == null)
-                                    {
-                                        alumno.Notas = new Nota[] { };
-                                    }
-                                    alumno.Notas.ToList().Add(nota);
-                                    alumno.Notas.ToArray();
-                                }
-                            }                    
-                        }
-                    }
-                }
-                else // seleccionó salas y alumnos de esas salas
-                {
-                    foreach (Sala s in salas)
-                    {
-                        if (salas.ToList().Contains(s)) // si la sala fue seleccionada, agrega a cada uno de sus alumnos seleccionados
-                        {
-                            foreach (Hijo alumno in LeerAlumnos())
-                            {
-                                if (alumno.Sala == s && hijos.ToList().Contains(alumno))
-                                {  
-                                    if (alumno.Notas == null)
-                                    {
-                                        alumno.Notas = new Nota[] { };
-                                    }
-                                    alumno.Notas.ToList().Add(nota);
-                                    alumno.Notas.ToArray();
-                                }
-                            }
-                        }
-                    }
-                }              
-            }
-            else // es padre y seleccionó a alguno de sus hijos o todos
-            {
-                // buscar hijos de ese padre
-                Padre padre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
-                Hijo[] hijoss = padre.Hijos;
-                foreach (Hijo hijo in hijoss)
-                {
-                    if (hijos.Contains(hijo))
-                    {
-                        if (hijo.Notas == null)
-                        {
-                            hijo.Notas = new Nota[] { };
-                        }
-                        hijo.Notas.ToList().Add(nota);
-                        hijo.Notas.ToArray();
-                    }
-                }
-            }
-            //Guardar datos
-            List<Nota> notas = LeerNotas();
-            if (notas == null)
-            {
-                notas = new List<Nota>();
-                notas.Add(nota);
+                Alumnos = new List<Hijo>();
             }
             else
             {
-                notas.Add(nota);
+                Alumnos = LeerAlumnos();
             }
-
-            using (StreamWriter Writer = new StreamWriter(pathNotas, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(notas));
-            }
-
-            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(LeerAlumnos()));
-            }
-            return new Resultado() { Errores = errores};
-
-            /*
-             * if (hijos != null && hijos.Length > 0)
+            Padres = LeerPadres();
+            nota.Id = LeerNotas().Count + 1;
+            if (hijos != null && hijos.Length > 0)
             {
                 foreach (var item in hijos)
                 {
-                    var hijo = _alumnos.Single(x => x.Id == item.Id);
+                    var hijo = Alumnos.Single(x => x.Id == item.Id);
                     var notasHijo = hijo.Notas == null ? new List<Nota>() : hijo.Notas.ToList();
-
                     notasHijo.Add(nota);
-
-                    hijo.Notas = notasHijo.ToArray();
+                    hijo.Notas = notasHijo.ToArray();                       
                 }
             }
             else
@@ -475,21 +404,44 @@ namespace Lógica
                 List<Hijo> alumnos = new List<Hijo>();
                 foreach (var sala in salas)
                 {
-                    alumnos.AddRange(_alumnos.Where(x => x.Sala.Id == sala.Id));
+                    alumnos.AddRange(Alumnos.Where(x => x.Sala.Id == sala.Id));
                 }
 
                 foreach (var item in alumnos)
                 {
                     var notasHijo = item.Notas == null ? new List<Nota>() : item.Notas.ToList();
-
                     notasHijo.Add(nota);
-
-                    item.Notas = notasHijo.ToArray();                    
+                    item.Notas = notasHijo.ToArray();
                 }
             }
 
-            return new Resultado();
-             */
+            //Guardar datos
+            if (LeerNotas() == null)
+            {
+                Notas = new List<Nota>();
+                Notas.Add(nota);
+            }
+            else
+            {
+                Notas.Add(nota);
+            }
+
+            using (StreamWriter Writer = new StreamWriter(pathNotas, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Notas));
+            }
+
+            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Alumnos));
+            }
+
+            using (StreamWriter Writer = new StreamWriter(pathPadres, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Padres));
+            }
+
+            return new Resultado() { Errores = errores};                     
         }
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
@@ -509,7 +461,7 @@ namespace Lógica
                 if (usuario == null || LeerUsuarios() == null) //no está registrado, lo guardo en ambos arrays y guardo nueva clave
                 {
                     Random rnd = new Random();
-                    Claves nueva = new Claves() { ID = padre.Id, Email = padre.Email, Roles = new Roless[] { Roless.Padre }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
+                    Claves nueva = new Claves() { ID = padre.Id, Email = padre.Email, Roles = new Roless[3] { Roless.Padre, Roless.Nulo, Roless.Nulo }, Clave = rnd.Next(100000, 999999).ToString() };//generar clave
                     if (LeerClaves() == null)
                     {
                         Claves = new List<Claves>();
@@ -536,7 +488,16 @@ namespace Lógica
                 else //ya está registrado, se agrega ROL en archivo "claves" 
                 {
                     Claves clave = LeerClaves().Where(x => x.Email == padre.Email).FirstOrDefault();
-                    clave.Roles[clave.Roles.Length] = Roless.Padre;
+                    int c = -1;
+                    foreach (Roless r in clave.Roles)
+                    {
+                        c = c + 1;
+                        if (r == Roless.Nulo)
+                        {
+                            clave.Roles[c] = Roless.Padre;
+                            break;
+                        }
+                    }
                 }
                 //GUARDAR clave nueva o actualizacion de roles
                 using (StreamWriter Writer = new StreamWriter(pathClaves, false))
@@ -761,7 +722,7 @@ namespace Lógica
             Claves nuevaClave = LeerClaves().Where(x => x.ID == docente.Id).FirstOrDefault();
 
             if (nuevaClave != null)
-                nuevaClave.Email = docente.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
+                nuevaClave.Email = docente.Email; 
 
             nuevoDocente.Id = id;
             nuevoDocente.Apellido = docente.Apellido;
@@ -893,21 +854,36 @@ namespace Lógica
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
+            List<string> errores = new List<string>();
             if (usuarioLogueado.RolSeleccionado == Roles.Padre)
             {
                 Padre nuevopadre = new Padre();
                 nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
-                foreach (Hijo hijo in nuevopadre.Hijos)
+                Alumnos = LeerAlumnos();
+                foreach (Hijo hijo in Alumnos)
                 {
-                    Nota nota1 = hijo.Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
-                    if (nota1 != null)
+                    if (hijo.Notas != null)
                     {
+                        Nota nota1 = hijo.Notas.Single(x => x.Id == nota.Id);
                         nota1.Leida = true;
+                        LeerNotas().Single(x => x.Id == nota.Id).Leida = true;
+                        //escribir en NOTAS y ALUMNOS
+                        using (StreamWriter Writer = new StreamWriter(pathNotas, false))
+                        {
+                            Writer.Write(JsonConvert.SerializeObject(Notas));
+                        }
+                        using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+                        {
+                            Writer.Write(JsonConvert.SerializeObject(Alumnos));
+                        }
                         break;
                     }
                 }
             }
-            return new Resultado();
+            else
+                errores.Add("No tiene permiso de realizar la acción");
+
+            return new Resultado() { Errores = errores};
         }
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
@@ -921,7 +897,7 @@ namespace Lógica
             {
                 return new Grilla<Hijo>()
                 {
-                    Lista = new List<Hijo>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = new List<Hijo>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                     .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = 0
                 };
@@ -929,7 +905,7 @@ namespace Lógica
             else
                 return new Grilla<Hijo>()
                 {
-                    Lista = LeerAlumnos().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = LeerAlumnos().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = LeerAlumnos().Count
                 };
@@ -940,68 +916,35 @@ namespace Lógica
             Nota[] arrayNotas = new Nota[] { };
             if (usuarioLogueado.RolSeleccionado == Roles.Padre) //padre. que vea solo lo de sus hijos.
             {
-                int c = 0;
                 Padre nuevoPadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
                 foreach (Hijo hijo in nuevoPadre.Hijos)
                 {
                     if (hijo.Id == idPersona)
-                    {
-                        foreach (Nota nota in Notas)
-                        {
-                            foreach (Nota nota2 in hijo.Notas)
-                            {
-                                if (nota == nota2)
-                                {
-                                    arrayNotas[c] = nota;
-                                    c = c + 1;
-                                }
-                            }
-                        }
+                    { //como no logramos que escriba en "Padres", consulta el archivo de Hijos ("Alumnos")
+                        Hijo hijoo = LeerAlumnos().Where(x => x.Id == idPersona).FirstOrDefault();
+                        arrayNotas = hijoo.Notas == null ? new Nota[] { } : hijoo.Notas.ToArray();
                     }
                 }
             }
             if (usuarioLogueado.RolSeleccionado == Roles.Directora) //directora. todos, no se debería validar nada
             {
-                int c = 0;
                 Hijo nuevoAlumno = LeerAlumnos().Where(x => x.Id == idPersona).FirstOrDefault();
-                foreach (Nota nota in Notas)
-                {
-                    foreach (Nota nota2 in nuevoAlumno.Notas)
-                    {
-                        if (nota == nota2)
-                        {
-                            arrayNotas[c] = nota;
-                            c = c + 1;
-                        }
-                    }
-                }
+                arrayNotas = nuevoAlumno.Notas == null ? new Nota[] { } : nuevoAlumno.Notas.ToArray();
             }
             if (usuarioLogueado.RolSeleccionado == Roles.Docente) //docente. ve solo lo de sus clases
             {
-                int c = 0;
                 Hijo nuevoAlumno = LeerAlumnos().Where(x => x.Id == idPersona).FirstOrDefault();
                 Docente nuevaDocente = LeerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
                 foreach (Sala sala in nuevaDocente.Salas)
                 {
-                    if (nuevoAlumno.Sala == sala)
+                    if (sala.Id == nuevoAlumno.Sala.Id)
                     {
-                        foreach(Nota nota in Notas)
-                        {
-                            foreach (Nota nota2 in nuevoAlumno.Notas)
-                            {
-                                if (nota == nota2)
-                                {
-                                    arrayNotas[c] = nota;
-                                    c = c + 1;
-                                }
-                            }
-                          
-                        }
+                        arrayNotas = nuevoAlumno.Notas == null ? new Nota[] { } : nuevoAlumno.Notas.ToArray();
                     }
                 }
             }
-            return arrayNotas;
-            
+
+            return arrayNotas;          
         }
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
@@ -1016,7 +959,7 @@ namespace Lógica
             {
                 return new Grilla<Directora>()
                 {
-                    Lista = new List<Directora>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = new List<Directora>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                     .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = 0
                 };
@@ -1024,7 +967,7 @@ namespace Lógica
             else
                 return new Grilla<Directora>()
                 {
-                    Lista = LeerDirectores().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = LeerDirectores().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = LeerDirectores().Count
                 };
@@ -1041,7 +984,7 @@ namespace Lógica
             {
                 return new Grilla<Docente>()
                 {
-                    Lista = new List<Docente>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = new List<Docente>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                     .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = 0
                 };
@@ -1049,7 +992,7 @@ namespace Lógica
             else
                 return new Grilla<Docente>()
                 {
-                    Lista = LeerDocentes().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = LeerDocentes().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = LeerDocentes().Count
                 };
@@ -1076,7 +1019,7 @@ namespace Lógica
             {
                 return new Grilla<Padre>()
                 {
-                    Lista = new List<Padre>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = new List<Padre>().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                     .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = 0
                 };
@@ -1084,7 +1027,7 @@ namespace Lógica
             else
                 return new Grilla<Padre>()
                 {
-                    Lista = LeerPadres().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal))
+                    Lista = LeerPadres().ToArray().Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Id.ToString().Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal))
                                         .Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray(),
                     CantidadRegistros = LeerPadres().Count
                 };
@@ -1092,21 +1035,44 @@ namespace Lógica
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
         {
+            /// Obtiene las notas de un cuaderno, si el usuario es padre solo puede obtener cuadernos de sus hijos, 
+            ///si es docente de alumnos de sus salas
+            /// y si es directora de cualquier alumno de la institucion
             switch (usuarioLogueado.RolSeleccionado)
             {
                 case Roles.Padre:
-                    return LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault().Hijos;
+                    {
+                        Padre padre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                        if (padre.Hijos == null)
+                        {
+                            padre.Hijos = new Hijo[] { };
+                        }
+                        return LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault().Hijos;
+                    }          
                 case Roles.Directora:
-                    return LeerAlumnos().ToArray();
+                    {
+                        if (LeerAlumnos() == null)
+                        {
+                            Alumnos = new List<Hijo>();
+                            return Alumnos.ToArray();
+                        }         
+                        else
+                            return LeerAlumnos().ToArray();
+                    }
                 case Roles.Docente: //devolver alumnos de todas sus aulas
                     {
                         List<Hijo> lista = new List<Hijo>();
                         Docente docente = LeerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                        //ver si es null
+                        if (docente.Salas == null)
+                        {
+                            docente.Salas = new Sala[] { };
+                        }
                         foreach (Sala sala in docente.Salas)
                         {
                             foreach (Hijo hijo in LeerAlumnos())
                             {
-                                if (hijo.Sala == sala)
+                                if (hijo.Sala.Id == sala.Id)
                                 {
                                     lista.Add(hijo);
                                 }
@@ -1132,10 +1098,6 @@ namespace Lógica
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
-            /*if (email == "directora@ucse.com" && clave == "123456")
-                  return new UsuarioLogueado() { Email = email, Nombre = "Usuario", Apellido = "Directora", Roles = new Roles[]
-                  { Roles.Directora }, RolSeleccionado = Roles.Directora }; */
-
             if (email == "" || clave == "")
                 return null;
             else
@@ -1151,7 +1113,7 @@ namespace Lógica
                         if (datos.Roles.ToList().Contains(Roless.Padre))
                         {
                             roles.Add(Roles.Padre);
-                            usuarioLog.RolSeleccionado = Roles.Padre;     // esto después SE CAMBIA, acá se usa si es solo 1 ROL
+                            usuarioLog.RolSeleccionado = Roles.Padre;
                         }
                         if (datos.Roles.ToList().Contains(Roless.Directora))
                         {
@@ -1181,36 +1143,104 @@ namespace Lógica
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
-            List<string> errores = new List<string>();
+            /*  Si es padre y la nota corresponde a uno de sus hijos
+                Si es docente y la nota corresponde a un alumno de su sala
+                Si es director y la nota corresponde a un alumno de su institución
+            */
+            Notas = LeerNotas();
+            Alumnos = LeerAlumnos();
+            Usuarios = LeerUsuarios();
+            nuevoComentario.Usuario = Usuarios.Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+            //agregar la respuesta en el archivo de notas en gral.
+            Nota n = Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
+            List<Comentario> comentarios = n.Comentarios.Count() == 0 ? new List<Comentario>() : n.Comentarios.ToList();
+            comentarios.Add(nuevoComentario);
+            n.Comentarios = comentarios.ToArray();
+            using (StreamWriter Writer = new StreamWriter(pathNotas, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Notas));
+            }
+
             if (usuarioLogueado.RolSeleccionado == Roles.Padre)
             {
-                Padre nuevopadre = new Padre();
-                nuevopadre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
-                foreach (Hijo hijo in nuevopadre.Hijos) //buscar nota dentro de los arrays de notas de cada hijo
-                {                                          
-                    Nota nota1 = hijo.Notas.Where(x => x.Id == nota.Id).FirstOrDefault();
-                    if (nota1 != null)
+                Padre padre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                if (padre.Hijos== null)
+                {
+                    padre.Hijos = new Hijo[] { };
+                }
+                foreach (Hijo h in padre.Hijos)
+                {
+                    foreach(Hijo a in Alumnos)
                     {
-                        nota1.Comentarios.ToList().Add(nuevoComentario);
-                        break;
+                        if (h.Id == a.Id)
+                        {
+                            if (a.Notas != null)
+                            {
+                                foreach(Nota notaa in a.Notas)
+                                {
+                                    if (notaa.Id == nota.Id)
+                                    {
+                                        notaa.Comentarios = comentarios.ToArray();
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
             else
             {
-                if (usuarioLogueado.RolSeleccionado == Roles.Docente) //ver alumnos de sus salas
+                if (usuarioLogueado.RolSeleccionado == Roles.Docente)
                 {
-                    Docente docente = new Docente();
-                }
-                else
-                {
-                    if (usuarioLogueado.RolSeleccionado == Roles.Directora) //ver todos los alumnos de la institución
+                    Docente docente = LeerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                    if (docente.Salas == null)
                     {
-
+                        docente.Salas = new Sala[] { };
+                    }
+                    foreach (Sala s in docente.Salas)
+                    {
+                        foreach (Hijo a in Alumnos)
+                        {
+                            if (s.Id == a.Sala.Id)
+                            {
+                                if (a.Notas != null)
+                                {
+                                    foreach (Nota notaa in a.Notas)
+                                    {
+                                        if (notaa.Id == nota.Id)
+                                        {
+                                            notaa.Comentarios = comentarios.ToArray();
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            }          
-            return new Resultado() { Errores = errores};
+                else //es DIRECTOR
+                {
+                    foreach (Hijo h in Alumnos)
+                    {
+                        if (h.Notas != null)
+                        {
+                            foreach (Nota notaa in h.Notas)
+                            {
+                                if (notaa.Id == nota.Id)
+                                {
+                                    notaa.Comentarios = comentarios.ToArray();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+                             
+            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+            {
+                Writer.Write(JsonConvert.SerializeObject(Alumnos));
+            }
+
+            return new Resultado();         
         }
     }
 }

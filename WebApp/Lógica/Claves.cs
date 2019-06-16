@@ -8,7 +8,7 @@ namespace Lógica
 {
     public enum Roless
     {
-        Padre, Directora, Docente
+        Padre, Directora, Docente, Nulo
     }
 
     public class Claves
