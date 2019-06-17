@@ -387,16 +387,36 @@ namespace Lógica
             {
                 Alumnos = LeerAlumnos();
             }
-            Padres = LeerPadres();
-            nota.Id = LeerNotas().Count + 1;
+            if (LeerNotas()==null)
+            {
+                Notas = new List<Nota>();
+            }
+            Notas = LeerNotas();
+            int cont = Notas.Count;
+            List<Nota> aux = new List<Nota>();
             if (hijos != null && hijos.Length > 0)
             {
                 foreach (var item in hijos)
                 {
+                    cont = cont + 1;
+                    Nota nota2 = new Nota();
+                    nota2.Comentarios = nota.Comentarios;
+                    nota2.Descripcion = nota.Descripcion;
+                    nota2.FechaEventoAsociado = nota.FechaEventoAsociado;
+                    nota2.Id = cont;
+                    nota2.Leida = nota.Leida;
+                    nota2.Titulo = nota.Titulo;
+
                     var hijo = Alumnos.Single(x => x.Id == item.Id);
                     var notasHijo = hijo.Notas == null ? new List<Nota>() : hijo.Notas.ToList();
-                    notasHijo.Add(nota);
-                    hijo.Notas = notasHijo.ToArray();                       
+                    notasHijo.Add(nota2);
+                    aux.Add(nota2);
+                    hijo.Notas = notasHijo.ToArray();
+         
+                    using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+                    {
+                        Writer.Write(JsonConvert.SerializeObject(Alumnos));
+                    }
                 }
             }
             else
@@ -407,40 +427,43 @@ namespace Lógica
                     alumnos.AddRange(Alumnos.Where(x => x.Sala.Id == sala.Id));
                 }
 
+                if (salas.Count() == 0) //padre escribe nota a todos sus hijos
+                {
+                    Padre padre = LeerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                    foreach (Hijo hijo in padre.Hijos)
+                    {
+                        alumnos.AddRange(Alumnos.Where(x => x.Id == hijo.Id));
+                    }
+                }
+
                 foreach (var item in alumnos)
                 {
+                    cont = cont + 1;
+                    Nota nota2 = new Nota();
+                    nota2.Comentarios = nota.Comentarios;
+                    nota2.Descripcion = nota.Descripcion;
+                    nota2.FechaEventoAsociado = nota.FechaEventoAsociado;
+                    nota2.Id = cont;
+                    nota2.Leida = nota.Leida;
+                    nota2.Titulo = nota.Titulo;
+                    
                     var notasHijo = item.Notas == null ? new List<Nota>() : item.Notas.ToList();
-                    notasHijo.Add(nota);
+                    notasHijo.Add(nota2);
+                    aux.Add(nota2);
                     item.Notas = notasHijo.ToArray();
+                    
+                    using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
+                    {
+                        Writer.Write(JsonConvert.SerializeObject(Alumnos));
+                    }
                 }
             }
-
             //Guardar datos
-            if (LeerNotas() == null)
-            {
-                Notas = new List<Nota>();
-                Notas.Add(nota);
-            }
-            else
-            {
-                Notas.Add(nota);
-            }
-
+            Notas.AddRange(aux);
             using (StreamWriter Writer = new StreamWriter(pathNotas, false))
             {
                 Writer.Write(JsonConvert.SerializeObject(Notas));
             }
-
-            using (StreamWriter Writer = new StreamWriter(pathAlumnos, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(Alumnos));
-            }
-
-            using (StreamWriter Writer = new StreamWriter(pathPadres, false))
-            {
-                Writer.Write(JsonConvert.SerializeObject(Padres));
-            }
-
             return new Resultado() { Errores = errores};                     
         }
 
@@ -1199,7 +1222,7 @@ namespace Lógica
                     }
                     foreach (Sala s in docente.Salas)
                     {
-                        foreach (Hijo a in Alumnos)
+                        foreach (Hijo a in Alumnos) 
                         {
                             if (s.Id == a.Sala.Id)
                             {
