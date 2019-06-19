@@ -392,7 +392,14 @@ namespace Lógica
                 Notas = new List<Nota>();
             }
             Notas = LeerNotas();
-            int cont = Notas.Count;
+            int cont;
+            if (Notas == null)
+            {
+                Notas = new List<Nota>();
+                cont = 0;
+            }
+            else
+                cont = Notas.Count;
             List<Nota> aux = new List<Nota>();
             if (hijos != null && hijos.Length > 0)
             {
