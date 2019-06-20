@@ -22,15 +22,16 @@ namespace Lógica
         private List<Claves> Claves { get; set; }
 
         //Path.Combine(Appdomain.CurrentDomain.BaseDirectory, Usuarios);
-        public const string pathUsuarios = @"C:\Archivos\Usuarios.txt";
-        public const string pathInstituciones = @"C:\Archivos\Instituciones.txt";
-        public const string pathDirectores = @"C:\Archivos\Directores.txt";
-        public const string pathDocentes = @"C:\Archivos\Docentes.txt";
-        public const string pathPadres = @"C:\Archivos\Padres.txt";
-        public const string pathAlumnos = @"C:\Archivos\Alumnos.txt";
-        public const string pathNotas = @"C:\Archivos\Notas.txt";
-        public const string pathSalas = @"C:\Archivos\Salas.txt";
-        public const string pathClaves = @"C:\Archivos\Claves.txt";
+        //CORRECCION -> Usar AppDomain, para eso en vez de una constante se puede usar una variable readonly
+        public readonly string pathUsuarios = $"{AppDomain.CurrentDomain.BaseDirectory}\\Usuarios.txt";
+        public readonly string pathInstituciones = $"{AppDomain.CurrentDomain.BaseDirectory}\\Instituciones.txt";
+        public readonly string pathDirectores = $"{AppDomain.CurrentDomain.BaseDirectory}\\Directores.txt";
+        public readonly string pathDocentes = $"{AppDomain.CurrentDomain.BaseDirectory}\\Docentes.txt";
+        public readonly string pathPadres = $"{AppDomain.CurrentDomain.BaseDirectory}\\Padres.txt";
+        public readonly string pathAlumnos = $"{AppDomain.CurrentDomain.BaseDirectory}\\Alumnos.txt";
+        public readonly string pathNotas = $"{AppDomain.CurrentDomain.BaseDirectory}\\Notas.txt";
+        public readonly string pathSalas = $"{AppDomain.CurrentDomain.BaseDirectory}\\Salas.txt";
+        public readonly string pathClaves = $"{AppDomain.CurrentDomain.BaseDirectory}\\Claves.txt";
 
         public LógicaGeneral()
         {
@@ -159,6 +160,11 @@ namespace Lógica
             return Claves;
         }  
 
+        //REVISION
+        //Muchas invocaciones al mismo metodo.
+        //La validacion de rol debe hacerse al inicio.
+        //El array de nulos no es necesario.
+        //
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Usuario usuario = null;
@@ -241,6 +247,7 @@ namespace Lógica
             return new Resultado() { Errores = errores };
         }
 
+        //Idem comentarios directora
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
         {
             Usuario usuario = null;
@@ -324,6 +331,7 @@ namespace Lógica
             return new Resultado() { Errores = errores };
         }
 
+        //Idem comentario directoras
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
             Usuario usuario = null;
@@ -376,6 +384,8 @@ namespace Lógica
             return new Resultado() { Errores = errores };
         }
 
+        //Se puede resolver mas facil, cuando no viene nada en el array de hijos, usar la misma variable
+        //y cargarla con los hijos de cada sala que llegue y se resuelve una sola vez el alta de sala.
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         { 
             List<string> errores = new List<string>();
@@ -474,6 +484,7 @@ namespace Lógica
             return new Resultado() { Errores = errores};                     
         }
 
+        //Idem directoras
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
         {
             Usuario usuario = null;
@@ -556,6 +567,7 @@ namespace Lógica
             return new Resultado() { Errores = errores };
         }
 
+        //Cuando se usa metodos "OrDefault" siempre se pregunta primero si no es null antes de seguir.
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
             List<string> errores = new List<string>();
@@ -679,6 +691,7 @@ namespace Lógica
             if (nuevaClave != null)
                 nuevaClave.Email = directora.Email; //PROBAR CUANDO ESTÉ HECHO EN ALTA
 
+            //El ID no se deberia editar.
             nuevaDirectora.Id = id;
             nuevaDirectora.Institucion = directora.Institucion;
             nuevaDirectora.Nombre = directora.Nombre;
@@ -716,6 +729,7 @@ namespace Lógica
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario = LeerUsuarios().Where(x => x.Id == hijo.Id).FirstOrDefault();
 
+            //El ID no se deberia editar
             nuevoHijo.Id = id;
             nuevoHijo.Institucion = hijo.Institucion;
             nuevoHijo.Nombre = hijo.Nombre;
@@ -882,6 +896,8 @@ namespace Lógica
 
         }
 
+        //Podrian tener un metodo similar al de "Leer" que sea "Escribir" y lo invocan siempre que necesiten
+        //actualizar un archivo.
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
             List<string> errores = new List<string>();
@@ -921,6 +937,8 @@ namespace Lógica
             return LeerAlumnos().Where(x => x.Id == id).FirstOrDefault();
         }
 
+        //El filtro cuando no hay alumnos es innecesario
+        //La cantidad de registros se calcula mal
         public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
             if (LeerAlumnos() == null)
@@ -1115,6 +1133,7 @@ namespace Lógica
             }
         }
 
+        //Falta validar que si el usuario es docente, traiga solo las salas donde este asignado.
         public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)//salas del usuario log
         {
             if (LeerSalas() == null)

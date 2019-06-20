@@ -1,0 +1,1 @@
+[{"Salas":[{"Id":1,"Nombre":"Aula 1"},{"Id":2,"Nombre":"Aula 2"}],"Id":7,"Nombre":"1","Apellido":"2","Email":"3"},{"Salas":[{"Id":4,"Nombre":"Aula 4"},{"Id":5,"Nombre":"Aula 5"}],"Id":8,"Nombre":"4 modif","Apellido":"5","Email":"6"}]
